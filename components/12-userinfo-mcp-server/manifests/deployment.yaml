@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userinfo-mcp-server
+  namespace: ${NS_SERVICES}
+  labels:
+    app: userinfo-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userinfo-mcp-server
+  template:
+    metadata:
+      labels:
+        app: userinfo-mcp-server
+    spec:
+      containers:
+      - name: mcp-server
+        image: ${IMAGE_USERINFO_MCP}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+          name: http
+        env:
+        - name: USERINFO_API_URL
+          value: "http://userinfo-api.${NS_SERVICES}.svc.cluster.local:8000"
+        - name: PORT
+          value: "8000"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL

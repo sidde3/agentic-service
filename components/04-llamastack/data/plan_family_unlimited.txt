@@ -1,0 +1,5 @@
+Plan: Family Unlimited (ID: plan_family_unlimited)
+  Description: Unlimited data for up to 4 lines, shared hotspot, family controls, best value for families.
+  Data: Unlimited | Cost: $110.0/mo | Speed: 1000 Mbps
+  Features: 5G Enabled, Hotspot Gb: 100, Unlimited Data, Hd Streaming, Family Plan, Max Lines: 4, Family Controls
+  Target: Families with multiple users, shared data needs, kids and parents, household connectivity

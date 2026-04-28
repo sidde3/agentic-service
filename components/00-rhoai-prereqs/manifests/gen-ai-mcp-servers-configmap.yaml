@@ -1,0 +1,21 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gen-ai-aa-mcp-servers
+  namespace: redhat-ods-applications
+data:
+  Usage-MCP-Server: |
+    {
+      "url": "http://usage-mcp-server-v2.${NS_SERVICES}.svc.cluster.local:8000/mcp",
+      "description": "Mobile usage data MCP server. Provides tools to check current user data usage, usage history, usage pattern analysis, and overage risk assessment."
+    }
+  HelloWorld-MCP-Server: |
+    {
+      "url": "http://helloworld-mcp-server.${NS_SERVICES}.svc.cluster.local:8000/mcp",
+      "description": "Demo hello world MCP server for testing MCP integration."
+    }
+  UserInfo-MCP-Server: |
+    {
+      "url": "http://userinfo-mcp-server.${NS_SERVICES}.svc.cluster.local:8000/mcp",
+      "description": "User information MCP server. Provides tools to query user profiles, subscriptions, plans, usage records, billing, and insights."
+    }

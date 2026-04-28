@@ -1,0 +1,41 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment / secrets
+.env
+pull-secret.json
+config/env.properties
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Tool configs
+.claude/
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archive (old/stale files kept for reference)
+archive/
+
+# Generated at deploy time
+components/.env.computed
+
+# Misc
+*.log
+.pytest_cache/
+htmlcov/
+.coverage

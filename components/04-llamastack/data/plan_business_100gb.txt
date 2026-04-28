@@ -1,0 +1,5 @@
+Plan: Business 100GB (ID: plan_business_100gb)
+  Description: Professional plan with 100GB data, unlimited priority calling, 50GB hotspot, business support.
+  Data: 100GB | Cost: $90.0/mo | Speed: 1000 Mbps
+  Features: 5G Enabled, Hotspot Gb: 50, Hd Streaming, Priority Support, International Roaming, Rollover Data
+  Target: Business professionals, remote workers, entrepreneurs, frequent travelers, conference calls

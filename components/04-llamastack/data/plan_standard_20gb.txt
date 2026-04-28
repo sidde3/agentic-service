@@ -1,0 +1,5 @@
+Plan: Standard 20GB (ID: plan_standard_20gb)
+  Description: Popular plan with 20GB high-speed data, 5GB hotspot, perfect for everyday use.
+  Data: 20GB | Cost: $45.0/mo | Speed: 200 Mbps
+  Features: 5G Enabled, Hotspot Gb: 5, Hd Streaming, Rollover Data
+  Target: Regular smartphone users, social media, browsing, video calls, moderate streaming

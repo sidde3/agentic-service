@@ -1,0 +1,17 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: bge-small-en-v15
+  namespace: ${NS_MODELS}
+  annotations:
+    serving.kserve.io/deploymentMode: RawDeployment
+    opendatahub.io/genai-asset: "true"
+  labels:
+    opendatahub.io/dashboard: "true"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-bge-small-runtime
+      storageUri: hf://BAAI/bge-small-en-v1.5

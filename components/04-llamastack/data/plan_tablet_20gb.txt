@@ -1,0 +1,5 @@
+Plan: Tablet 20GB (ID: plan_tablet_20gb)
+  Description: Data-only plan optimized for tablets with 20GB monthly data and HD streaming.
+  Data: 20GB | Cost: $40.0/mo | Speed: 300 Mbps
+  Features: 5G Enabled, Data Only, Hd Streaming
+  Target: Tablet users, students with tablets, professionals with iPads, mobile productivity

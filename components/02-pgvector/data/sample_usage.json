@@ -1,0 +1,475 @@
+{
+  "user_light_1": {
+    "user_id": "user_light_1",
+    "name": "Sarah Chen",
+    "current_plan": "Budget Saver 5GB",
+    "current_usage": {
+      "data_used_gb": 3.2,
+      "voice_minutes": 95,
+      "sms_count": 42,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 2.8,
+        "voice_minutes": 87,
+        "sms_count": 38,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 3.5,
+        "voice_minutes": 102,
+        "sms_count": 45,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 2.9,
+        "voice_minutes": 78,
+        "sms_count": 35,
+        "overage_charges": 0.00
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 3.1,
+      "average_voice_minutes": 90,
+      "average_sms_count": 40,
+      "trend": "stable",
+      "usage_category": "light",
+      "peak_usage_month": "2026-02",
+      "recommended_data_buffer_gb": 2
+    }
+  },
+  "user_medium_1": {
+    "user_id": "user_medium_1",
+    "name": "Michael Rodriguez",
+    "current_plan": "Standard 20GB",
+    "current_usage": {
+      "data_used_gb": 17.4,
+      "voice_minutes": 245,
+      "sms_count": 156,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 18.9,
+        "voice_minutes": 268,
+        "sms_count": 142,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 16.2,
+        "voice_minutes": 221,
+        "sms_count": 138,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 17.8,
+        "voice_minutes": 252,
+        "sms_count": 165,
+        "overage_charges": 0.00
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 17.6,
+      "average_voice_minutes": 246,
+      "average_sms_count": 150,
+      "trend": "stable",
+      "usage_category": "medium",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 5
+    }
+  },
+  "user_heavy_1": {
+    "user_id": "user_heavy_1",
+    "name": "Jessica Thompson",
+    "current_plan": "Standard 20GB",
+    "current_usage": {
+      "data_used_gb": 78.3,
+      "voice_minutes": 450,
+      "sms_count": 203,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 58.30
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 82.5,
+        "voice_minutes": 420,
+        "sms_count": 189,
+        "overage_charges": 62.50
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 75.2,
+        "voice_minutes": 390,
+        "sms_count": 215,
+        "overage_charges": 55.20
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 68.9,
+        "voice_minutes": 365,
+        "sms_count": 192,
+        "overage_charges": 48.90
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 76.2,
+      "average_voice_minutes": 406,
+      "average_sms_count": 200,
+      "trend": "increasing",
+      "usage_category": "heavy",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 20
+    }
+  },
+  "user_overage_risk": {
+    "user_id": "user_overage_risk",
+    "name": "David Kim",
+    "current_plan": "Plus 30GB",
+    "current_usage": {
+      "data_used_gb": 27.8,
+      "voice_minutes": 312,
+      "sms_count": 124,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 32.4,
+        "voice_minutes": 295,
+        "sms_count": 118,
+        "overage_charges": 2.40
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 29.1,
+        "voice_minutes": 278,
+        "sms_count": 132,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 31.2,
+        "voice_minutes": 301,
+        "sms_count": 145,
+        "overage_charges": 1.20
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 30.1,
+      "average_voice_minutes": 296,
+      "average_sms_count": 130,
+      "trend": "fluctuating_high",
+      "usage_category": "medium-heavy",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 10
+    }
+  },
+  "user_international": {
+    "user_id": "user_international",
+    "name": "Elena Volkov",
+    "current_plan": "Premium 50GB",
+    "current_usage": {
+      "data_used_gb": 42.6,
+      "voice_minutes": 580,
+      "sms_count": 245,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00,
+      "international_roaming_days": 12
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 45.8,
+        "voice_minutes": 612,
+        "sms_count": 267,
+        "overage_charges": 0.00,
+        "international_roaming_days": 15
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 38.2,
+        "voice_minutes": 521,
+        "sms_count": 198,
+        "overage_charges": 0.00,
+        "international_roaming_days": 8
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 51.3,
+        "voice_minutes": 695,
+        "sms_count": 312,
+        "overage_charges": 1.30,
+        "international_roaming_days": 18
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 44.5,
+      "average_voice_minutes": 602,
+      "average_sms_count": 256,
+      "trend": "stable",
+      "usage_category": "heavy",
+      "peak_usage_month": "2026-01",
+      "recommended_data_buffer_gb": 15,
+      "international_usage": true,
+      "average_roaming_days_per_month": 13
+    }
+  },
+  "user_budget_seeker": {
+    "user_id": "user_budget_seeker",
+    "name": "Robert Martinez",
+    "current_plan": "Prepaid 10GB",
+    "current_usage": {
+      "data_used_gb": 8.2,
+      "voice_minutes": 156,
+      "sms_count": 78,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 9.4,
+        "voice_minutes": 172,
+        "sms_count": 92,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 7.8,
+        "voice_minutes": 148,
+        "sms_count": 65,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 8.9,
+        "voice_minutes": 163,
+        "sms_count": 81,
+        "overage_charges": 0.00
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 8.6,
+      "average_voice_minutes": 160,
+      "average_sms_count": 79,
+      "trend": "stable",
+      "usage_category": "light-medium",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 3,
+      "budget_conscious": true
+    }
+  },
+  "user_student": {
+    "user_id": "user_student",
+    "name": "Amy Zhang",
+    "current_plan": "Student 15GB",
+    "current_usage": {
+      "data_used_gb": 12.8,
+      "voice_minutes": 201,
+      "sms_count": 312,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 14.2,
+        "voice_minutes": 189,
+        "sms_count": 298,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 11.5,
+        "voice_minutes": 176,
+        "sms_count": 267,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 13.9,
+        "voice_minutes": 215,
+        "sms_count": 345,
+        "overage_charges": 0.00
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 13.1,
+      "average_voice_minutes": 195,
+      "average_sms_count": 305,
+      "trend": "stable",
+      "usage_category": "medium",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 5,
+      "student_plan": true
+    }
+  },
+  "user_gamer": {
+    "user_id": "user_gamer",
+    "name": "Tyler Johnson",
+    "current_plan": "Plus 30GB",
+    "current_usage": {
+      "data_used_gb": 54.7,
+      "voice_minutes": 178,
+      "sms_count": 89,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 24.70
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 58.3,
+        "voice_minutes": 165,
+        "sms_count": 72,
+        "overage_charges": 28.30
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 51.2,
+        "voice_minutes": 142,
+        "sms_count": 95,
+        "overage_charges": 21.20
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 49.8,
+        "voice_minutes": 189,
+        "sms_count": 103,
+        "overage_charges": 19.80
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 53.5,
+      "average_voice_minutes": 168,
+      "average_sms_count": 90,
+      "trend": "increasing",
+      "usage_category": "heavy",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 30,
+      "usage_pattern": "gaming_heavy"
+    }
+  },
+  "user_senior": {
+    "user_id": "user_senior",
+    "name": "Margaret Wilson",
+    "current_plan": "Senior Essential 3GB",
+    "current_usage": {
+      "data_used_gb": 1.8,
+      "voice_minutes": 142,
+      "sms_count": 28,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 0.00
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 1.6,
+        "voice_minutes": 156,
+        "sms_count": 31,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 2.1,
+        "voice_minutes": 138,
+        "sms_count": 24,
+        "overage_charges": 0.00
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 1.7,
+        "voice_minutes": 149,
+        "sms_count": 27,
+        "overage_charges": 0.00
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 1.8,
+      "average_voice_minutes": 146,
+      "average_sms_count": 28,
+      "trend": "stable",
+      "usage_category": "light",
+      "peak_usage_month": "2026-02",
+      "recommended_data_buffer_gb": 1,
+      "senior_plan": true
+    }
+  },
+  "user_family": {
+    "user_id": "user_family",
+    "name": "The Anderson Family",
+    "current_plan": "Standard 20GB",
+    "current_usage": {
+      "data_used_gb": 89.4,
+      "voice_minutes": 1256,
+      "sms_count": 567,
+      "billing_cycle_start": "2026-04-01",
+      "billing_cycle_end": "2026-04-30",
+      "days_into_cycle": 23,
+      "overage_charges": 69.40,
+      "number_of_lines": 4
+    },
+    "usage_history": [
+      {
+        "month": "2026-03",
+        "data_used_gb": 95.7,
+        "voice_minutes": 1342,
+        "sms_count": 612,
+        "overage_charges": 75.70
+      },
+      {
+        "month": "2026-02",
+        "data_used_gb": 82.3,
+        "voice_minutes": 1189,
+        "sms_count": 534,
+        "overage_charges": 62.30
+      },
+      {
+        "month": "2026-01",
+        "data_used_gb": 87.6,
+        "voice_minutes": 1278,
+        "sms_count": 589,
+        "overage_charges": 67.60
+      }
+    ],
+    "usage_analytics": {
+      "average_data_gb": 88.8,
+      "average_voice_minutes": 1266,
+      "average_sms_count": 575,
+      "trend": "increasing",
+      "usage_category": "family_heavy",
+      "peak_usage_month": "2026-03",
+      "recommended_data_buffer_gb": 40,
+      "family_plan_recommended": true,
+      "number_of_lines": 4
+    }
+  }
+}

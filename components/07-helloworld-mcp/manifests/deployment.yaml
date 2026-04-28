@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-mcp-server
+  namespace: ${NS_SERVICES}
+  labels:
+    app: helloworld-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helloworld-mcp-server
+  template:
+    metadata:
+      labels:
+        app: helloworld-mcp-server
+    spec:
+      containers:
+        - name: mcp-server
+          image: ${IMAGE_HELLO_MCP}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MCP_SERVER_HOST
+              value: "0.0.0.0"
+            - name: MCP_SERVER_PORT
+              value: "8000"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld-mcp-server
+  namespace: ${NS_SERVICES}
+spec:
+  type: ClusterIP
+  selector:
+    app: helloworld-mcp-server
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: helloworld-mcp-server
+  namespace: ${NS_SERVICES}
+  labels:
+    app: helloworld-mcp-server
+  annotations:
+    openshift.io/description: "Troubleshooting route — can be removed in production"
+spec:
+  to:
+    kind: Service
+    name: helloworld-mcp-server
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

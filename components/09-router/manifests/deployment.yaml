@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router-service
+  namespace: ${NS_SERVICES}
+  labels:
+    app: router-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router-service
+  template:
+    metadata:
+      labels:
+        app: router-service
+    spec:
+      containers:
+        - name: router-service
+          image: ${IMAGE_ROUTER}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: REDIS_HOST
+              value: "redis.${NS_SERVICES}.svc.cluster.local"
+            - name: REDIS_PORT_NUMBER
+              value: "6379"
+            - name: REDIS_PASSWORD
+              value: "${REDIS_PASSWORD}"
+            - name: DATABASE_URL
+              value: "postgresql://${PG_USERINFO_USER}:${PG_USERINFO_PASSWORD}@pgvector.${NS_PGVECTOR}.svc.cluster.local:5432/userinfo"
+            - name: VLLM_API_URL
+              value: "https://${BERT_MODEL_NAME}-${NS_MODELS}.${CLUSTER_DOMAIN}"
+            - name: MODEL_NAME
+              value: "${BERT_MODEL_NAME}"
+            - name: AGENT_API_URL
+              value: "http://agent-service.${NS_SERVICES}.svc.cluster.local:8080"
+            - name: CONFIG_MOUNT_PATH
+              value: "/app/config/router"
+            - name: MAX_TURNS
+              value: "${MAX_TURNS}"
+            - name: BERT_CONFIDENCE_THRESHOLD
+              value: "${BERT_CONFIDENCE_THRESHOLD}"
+          volumeMounts:
+            - name: router-config
+              mountPath: /app/config/router
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: router-config
+          configMap:
+            name: router-config

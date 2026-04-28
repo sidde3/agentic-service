@@ -1,0 +1,5 @@
+Plan: Premium Plus 150GB (ID: plan_premium_plus_150gb)
+  Description: Ultimate plan with 150GB ultra-fast 5G data, 75GB hotspot, all premium features included.
+  Data: 150GB | Cost: $120.0/mo | Speed: 1200 Mbps
+  Features: 5G Enabled, Hotspot Gb: 75, Hd Streaming, 4k Streaming, Priority Access, International Roaming, Premium Support
+  Target: Power users, professionals, content creators, maximum data needs, no compromises

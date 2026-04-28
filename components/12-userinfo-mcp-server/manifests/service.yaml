@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: userinfo-mcp-server
+  namespace: ${NS_SERVICES}
+  labels:
+    app: userinfo-mcp-server
+spec:
+  selector:
+    app: userinfo-mcp-server
+  type: ClusterIP
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8000
+    targetPort: 8000

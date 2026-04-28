@@ -1,0 +1,128 @@
+# AI Agentic Use Case
+
+Multi-turn customer-service chat system powered by fine-tuned BERT intent classification and an LLM-driven agentic workflow on **Red Hat OpenShift AI**.
+
+A user messages through a **Streamlit Chat UI**. The **Router** classifies the message via a fine-tuned **PhayaThai BERT** model. Data-plan intents are forwarded to an **Agent** that orchestrates **LlamaStack** — combining MCP tools (live user data via UserInfo API) with pgvector RAG (plan catalog search) — and returns a personalised recommendation powered by **Qwen 2.5 7B**.
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph cluster [OpenShift Cluster]
+    subgraph pgNS [pgvector namespace]
+      PG[(pgvector)]
+      DB1[llamastack DB]
+      DB2[userinfo DB]
+      DB3[pgvector DB]
+    end
+    subgraph models [models namespace]
+      BERT[BERT — intent classification]
+      Qwen[Qwen 2.5 7B AWQ]
+      BGE[BGE-small — embeddings]
+    end
+    subgraph ls [llamastack namespace]
+      LS[LlamaStack Distribution]
+    end
+    subgraph svc [agentic-service namespace]
+      Redis[(Redis)]
+      Router[Router]
+      Agent[Agent]
+      UsageMCP[Usage MCP]
+      HelloMCP[HelloWorld MCP]
+      UserInfoAPI[UserInfo API]
+      UserInfoMCP[UserInfo MCP]
+    end
+    Client[Chat UI] --> Router
+    Router --> BERT
+    Router -->|agent intents| Agent
+    Router --> Redis
+    Router --> DB2
+    Agent --> LS
+    LS --> Qwen
+    LS --> BGE
+    LS --> DB1
+    LS --> DB3
+    LS --> UserInfoMCP
+    UserInfoMCP --> UserInfoAPI
+    UserInfoAPI --> DB2
+  end
+```
+
+## Components
+
+| # | Component | Description | Docs |
+|---|-----------|-------------|------|
+| 00 | RHOAI Prerequisites | KServe, GenAI Studio, LlamaStack operator, MCP ConfigMap | [docs](docs/components/00-rhoai-prereqs.md) |
+| 02 | pgvector | PostgreSQL + pgvector: 3 databases, K8s Jobs for init/seed | [docs](docs/components/02-pgvector.md) |
+| 03 | Models | Qwen 2.5 7B (GPU), BERT (CPU), BGE-small (CPU) | [docs](docs/components/03-models.md) |
+| 04 | LlamaStack | Inference, agents, vector I/O, MCP tool runtime | [docs](docs/components/04-llamastack.md) |
+| 05 | Redis | Session store for router | [docs](docs/components/05-redis.md) |
+| 06 | Usage MCP Server | Direct SQL-based mobile usage MCP tools | [docs](docs/components/06-usage-mcp-server.md) |
+| 07 | HelloWorld MCP | Demo MCP server for GenAI Studio testing | [docs](docs/components/07-helloworld-mcp.md) |
+| 08 | Agent | LlamaStack agent with MCP + RAG toolgroups | [docs](docs/components/08-agent.md) |
+| 09 | Router | BERT intent classification + routing | [docs](docs/components/09-router.md) |
+| 10 | Frontend | Streamlit chat UI (runs locally) | [docs](docs/components/10-frontend.md) |
+| 11 | UserInfo API | REST API over userinfo database | [docs](docs/components/11-userinfo-api.md) |
+| 12 | UserInfo MCP Server | MCP proxy to UserInfo API | [docs](docs/components/12-userinfo-mcp-server.md) |
+
+## Quick Start
+
+```bash
+# 1. Configure
+cp config/env.properties.example config/env.properties
+# Edit with your cluster domain, credentials, image tags
+
+# 2. Deploy everything
+bash scripts/deploy-all.sh
+
+# 3. Run the chat UI
+export ROUTER_URL="https://router-service-agentic-service.apps.<your-cluster>"
+streamlit run components/10-frontend/src/chat_app.py
+```
+
+See the full [Deployment Guide](docs/deployment-guide.md) for details.
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture](docs/architecture.md) | System design, data flow, database layout |
+| [Deployment Guide](docs/deployment-guide.md) | Step-by-step deployment instructions |
+| [Troubleshooting](docs/troubleshooting.md) | Common issues and solutions |
+| [Component Docs](docs/README.md) | Per-component code walkthroughs and config |
+
+## Tech Stack
+
+- **Platform**: Red Hat OpenShift AI with KServe
+- **LLM Orchestration**: LlamaStack (MCP + pgvector + Agents API)
+- **Models**: Qwen 2.5 7B Instruct AWQ (vLLM), PhayaThai BERT (intent), BGE-small (embeddings)
+- **Backend**: Python 3.11+, FastAPI, SQLAlchemy, asyncpg, httpx
+- **Session Store**: Redis
+- **Database**: PostgreSQL 15 + pgvector
+- **Frontend**: Streamlit
+- **Vector Ingestion**: Kubeflow Pipelines (OpenShift AI)
+- **Images**: `quay.io/sidde3/*`
+
+## Repository Structure
+
+```
+ais-agentic-usecase/
+├── config/                    # env.properties (central configuration)
+├── components/
+│   ├── 00-rhoai-prereqs/      # Cluster-admin RHOAI setup
+│   ├── 02-pgvector/           # PostgreSQL + pgvector + K8s Jobs
+│   ├── 03-models/             # KServe InferenceServices (Qwen, BERT, BGE)
+│   ├── 04-llamastack/         # LlamaStack distribution + plan data
+│   ├── 05-redis/              # Redis
+│   ├── 06-usage-mcp-server/   # Usage data MCP server
+│   ├── 07-helloworld-mcp/     # Demo MCP server
+│   ├── 08-agent/              # Agent service
+│   ├── 09-router/             # Intent router
+│   ├── 10-frontend/           # Streamlit chat UI
+│   ├── 11-userinfo-api/       # UserInfo REST API
+│   └── 12-userinfo-mcp-server/ # UserInfo MCP server
+├── scripts/                   # deploy-all.sh, utils.sh
+├── docs/                      # Architecture, deployment, component docs
+├── tests/                     # Health and integration tests
+└── archive/                   # Old code and docs (reference only)
+```

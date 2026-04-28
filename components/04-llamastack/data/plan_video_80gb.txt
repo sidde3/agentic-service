@@ -1,0 +1,5 @@
+Plan: Video Streamer 80GB (ID: plan_video_80gb)
+  Description: Content creator and video streamer plan with 80GB high-speed data, 4K streaming support, and 30GB hotspot.
+  Data: 80GB | Cost: $75.0/mo | Speed: 600 Mbps
+  Features: 5G Enabled, Hotspot Gb: 30, Hd Streaming, 4k Streaming, Family Discount, Rollover Data
+  Target: Content creators, vloggers, 4K video streaming, social media influencers, heavy video consumption

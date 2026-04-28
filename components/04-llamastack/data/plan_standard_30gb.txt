@@ -1,0 +1,5 @@
+Plan: Standard 30GB (ID: plan_standard_30gb)
+  Description: Enhanced plan with 30GB data, 10GB hotspot, HD streaming included.
+  Data: 30GB | Cost: $55.0/mo | Speed: 300 Mbps
+  Features: 5G Enabled, Hotspot Gb: 10, Hd Streaming, Family Discount, Rollover Data
+  Target: Active users, frequent video streaming, social media enthusiasts, work from home

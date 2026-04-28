@@ -1,0 +1,21 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: qwen25-7b-instruct
+  namespace: ${NS_MODELS}
+  annotations:
+    serving.kserve.io/deploymentMode: RawDeployment
+    opendatahub.io/genai-asset: "true"
+  labels:
+    opendatahub.io/dashboard: "true"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: vLLM
+      runtime: vllm-qwen-runtime
+      storageUri: oci://quay.io/sidde3/qwen2.5-7b-instruct:latest
+    tolerations:
+      - key: nvidia.com/gpu
+        value: l40-gpu
+        effect: NoSchedule

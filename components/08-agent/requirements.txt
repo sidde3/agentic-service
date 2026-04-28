@@ -1,0 +1,19 @@
+# Mobile Plan Recommendation Agent Dependencies
+# Agent calls Llama Stack REST API directly via httpx (no SDK needed)
+
+# FastAPI and Web Server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# HTTP Client
+httpx>=0.25.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Shared Dependencies (from shared/ modules)
+prometheus-client>=0.19.0
+
+# Utilities
+python-json-logger>=2.0.7

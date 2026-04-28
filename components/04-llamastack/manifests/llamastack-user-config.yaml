@@ -1,0 +1,214 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llamastack-user-config
+  namespace: ${NS_LLAMASTACK}
+data:
+  run.yaml: |
+    version: 2
+    image_name: rh
+    apis:
+      - agents
+      - batches
+      - datasetio
+      - eval
+      - inference
+      - safety
+      - scoring
+      - tool_runtime
+      - vector_io
+      - files
+    providers:
+      agents:
+        - config:
+            persistence:
+              agent_state:
+                backend: kv_default
+                namespace: agents::meta_reference
+              responses:
+                backend: sql_default
+                max_write_queue_size: 10000
+                num_writers: 4
+                table_name: agents_responses
+          provider_id: meta-reference
+          provider_type: inline::meta-reference
+      batches:
+        - config:
+            kvstore:
+              backend: kv_default
+              namespace: batches
+          provider_id: reference
+          provider_type: inline::reference
+      datasetio:
+        - config:
+            kvstore:
+              backend: kv_default
+              namespace: datasetio::huggingface
+          provider_id: huggingface
+          provider_type: remote::huggingface
+        - config:
+            kvstore:
+              backend: kv_default
+              namespace: datasetio::localfs
+          provider_id: localfs
+          provider_type: inline::localfs
+      eval:
+        - config:
+            base_url: ${VLLM_INTERNAL_URL}
+            use_k8s: true
+          module: llama_stack_provider_lmeval==0.2.4
+          provider_id: trustyai_lmeval
+          provider_type: remote::trustyai_lmeval
+      files:
+        - config:
+            metadata_store:
+              backend: sql_default
+              table_name: files_metadata
+            storage_dir: /opt/app-root/src/.llama/distributions/rh/files
+          provider_id: meta-reference-files
+          provider_type: inline::localfs
+      inference:
+        - config:
+            api_token: ""
+            max_tokens: 4096
+            tls_verify: false
+            url: ${VLLM_INTERNAL_URL}
+          provider_id: vllm-inference
+          provider_type: remote::vllm
+        - config:
+            api_token: ""
+            max_tokens: 512
+            tls_verify: false
+            url: http://bge-small-en-v15-predictor.${NS_MODELS}.svc.cluster.local/v1
+          provider_id: vllm-bge-small
+          provider_type: remote::vllm
+        - config: {}
+          provider_id: sentence-transformers
+          provider_type: inline::sentence-transformers
+      safety:
+        - config:
+            shields: {}
+          module: llama_stack_provider_trustyai_fms==0.3.2
+          provider_id: trustyai_fms
+          provider_type: remote::trustyai_fms
+      scoring:
+        - config: {}
+          provider_id: basic
+          provider_type: inline::basic
+        - config: {}
+          provider_id: llm-as-judge
+          provider_type: inline::llm-as-judge
+        - config:
+            openai_api_key: ""
+          provider_id: braintrust
+          provider_type: inline::braintrust
+      tool_runtime:
+        - config:
+            api_key: ""
+            max_results: 3
+          provider_id: brave-search
+          provider_type: remote::brave-search
+        - config:
+            api_key: ""
+            max_results: 3
+          provider_id: tavily-search
+          provider_type: remote::tavily-search
+        - config: {}
+          provider_id: rag-runtime
+          provider_type: inline::rag-runtime
+        - config: {}
+          provider_id: model-context-protocol
+          provider_type: remote::model-context-protocol
+      vector_io:
+        - config:
+            host: pgvector.${NS_PGVECTOR}.svc.cluster.local
+            port: 5432
+            db: ${PGVECTOR_DB}
+            user: ${PGVECTOR_USER}
+            password: ${PGVECTOR_PASSWORD}
+            persistence:
+              backend: kv_default
+              namespace: vector_io::pgvector
+          provider_id: pgvector
+          provider_type: remote::pgvector
+        - config:
+            db_path: /opt/app-root/src/.llama/distributions/rh/milvus.db
+            persistence:
+              backend: kv_default
+              namespace: vector_io::milvus
+          provider_id: milvus
+          provider_type: inline::milvus
+    registered_resources:
+      benchmarks: []
+      datasets: []
+      models:
+        - model_id: all-MiniLM-L6-v2
+          provider_id: sentence-transformers
+          provider_resource_id: all-MiniLM-L6-v2
+          model_type: embedding
+          metadata:
+            embedding_dimension: 384
+        - model_id: bge-small-en-v15
+          provider_id: vllm-bge-small
+          provider_resource_id: bge-small-en-v15
+          model_type: embedding
+          metadata:
+            embedding_dimension: 384
+        - model_id: nomic-ai/nomic-embed-text-v1.5
+          provider_id: sentence-transformers
+          provider_resource_id: nomic-ai/nomic-embed-text-v1.5
+          model_type: embedding
+          metadata:
+            embedding_dimension: 768
+        - model_id: llama32-3b
+          provider_id: vllm-inference
+          provider_resource_id: llama32-3b
+          model_type: llm
+          metadata: {}
+        - model_id: qwen25-7b-instruct
+          provider_id: vllm-inference
+          provider_resource_id: qwen25-7b-instruct
+          model_type: llm
+          metadata: {}
+      scoring_fns: []
+      shields: []
+      tool_groups:
+        - provider_id: tavily-search
+          toolgroup_id: builtin::websearch
+        - provider_id: rag-runtime
+          toolgroup_id: builtin::rag
+      vector_stores: []
+    server:
+      port: 8321
+      workers: 1
+    storage:
+      backends:
+        kv_default:
+          db: llamastack
+          host: pgvector.${NS_PGVECTOR}.svc.cluster.local
+          password: ${PG_LLAMASTACK_PASSWORD}
+          port: 5432
+          table_name: llamastack_kvstore
+          type: kv_postgres
+          user: ${PG_LLAMASTACK_USER}
+        sql_default:
+          db: llamastack
+          host: pgvector.${NS_PGVECTOR}.svc.cluster.local
+          password: ${PG_LLAMASTACK_PASSWORD}
+          port: 5432
+          type: sql_postgres
+          user: ${PG_LLAMASTACK_USER}
+      stores:
+        conversations:
+          backend: sql_default
+          table_name: openai_conversations
+        inference:
+          backend: sql_default
+          max_write_queue_size: 10000
+          num_writers: 4
+          table_name: inference_store
+        metadata:
+          backend: kv_default
+          namespace: registry
+    telemetry:
+      enabled: true

@@ -1,0 +1,5 @@
+Plan: International 25GB (ID: plan_international_25gb)
+  Description: Global traveler plan with 25GB data, free roaming in 200+ countries, international calling.
+  Data: 25GB | Cost: $80.0/mo | Speed: 300 Mbps
+  Features: 5G Enabled, Hotspot Gb: 10, Hd Streaming, International Roaming, Free International Calling, Rollover Data
+  Target: International travelers, expats, business travelers, global connectivity needs

@@ -1,0 +1,5 @@
+Plan: Social Media 15GB (ID: plan_social_media_15gb)
+  Description: Social media optimized with 15GB data, free access to major social platforms, video streaming.
+  Data: 15GB | Cost: $38.0/mo | Speed: 200 Mbps
+  Features: 5G Enabled, Hotspot Gb: 3, Hd Streaming, Free Social Media, Rollover Data
+  Target: Social media enthusiasts, influencers, content sharers, Instagram and TikTok users

@@ -1,0 +1,362 @@
+[
+  {
+    "plan_id": "plan_budget_5gb",
+    "plan_name": "Budget Saver 5GB",
+    "description": "Entry-level plan for light users with 5GB data, unlimited talk and text. Perfect for basic connectivity needs.",
+    "data_allowance_gb": 5,
+    "monthly_cost": 25.00,
+    "speed_mbps": 50,
+    "features": {
+      "5g_enabled": false,
+      "hotspot_gb": 0,
+      "international_roaming": false,
+      "hd_streaming": false,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Light users, seniors, emergency backup phone, minimal data needs, budget-conscious customers"
+  },
+  {
+    "plan_id": "plan_starter_10gb",
+    "plan_name": "Starter 10GB",
+    "description": "Affordable plan with 10GB data for moderate social media and messaging. Includes 2GB mobile hotspot.",
+    "data_allowance_gb": 10,
+    "monthly_cost": 35.00,
+    "speed_mbps": 100,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 2,
+      "international_roaming": false,
+      "hd_streaming": false,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Light to moderate users, social media browsing, occasional video calls, students"
+  },
+  {
+    "plan_id": "plan_standard_20gb",
+    "plan_name": "Standard 20GB",
+    "description": "Mid-tier plan with 20GB 5G data for regular users. Includes 5GB mobile hotspot and HD streaming.",
+    "data_allowance_gb": 20,
+    "monthly_cost": 45.00,
+    "speed_mbps": 200,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 5,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Moderate users, social media, music streaming, occasional video streaming, remote workers"
+  },
+  {
+    "plan_id": "plan_plus_30gb",
+    "plan_name": "Plus 30GB",
+    "description": "Enhanced plan with 30GB high-speed 5G data, 10GB hotspot, and international texting included.",
+    "data_allowance_gb": 30,
+    "monthly_cost": 55.00,
+    "speed_mbps": 300,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 10,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Regular users, frequent video calls, music and podcast streaming, moderate video streaming"
+  },
+  {
+    "plan_id": "plan_premium_50gb",
+    "plan_name": "Premium 50GB",
+    "description": "High-tier plan with 50GB ultra-fast 5G data, 15GB hotspot, international texting, and priority customer support.",
+    "data_allowance_gb": 50,
+    "monthly_cost": 65.00,
+    "speed_mbps": 500,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 15,
+      "international_roaming": true,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Heavy users, frequent video streaming, international travelers, business professionals"
+  },
+  {
+    "plan_id": "plan_unlimited_basic",
+    "plan_name": "Unlimited Basic",
+    "description": "Unlimited data with standard speeds (throttled after 50GB). Includes 10GB hotspot and HD streaming.",
+    "data_allowance_gb": 999999,
+    "monthly_cost": 70.00,
+    "speed_mbps": 100,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 10,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Unlimited data seekers, no overage anxiety, consistent heavy usage, video streaming enthusiasts"
+  },
+  {
+    "plan_id": "plan_unlimited_plus",
+    "plan_name": "Unlimited Plus",
+    "description": "Unlimited 5G data with 100GB high-speed priority, 30GB hotspot, and international texting.",
+    "data_allowance_gb": 999999,
+    "monthly_cost": 80.00,
+    "speed_mbps": 500,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 30,
+      "international_roaming": true,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Power users, 4K video streaming, extensive mobile hotspot use, frequent travelers"
+  },
+  {
+    "plan_id": "plan_unlimited_premium",
+    "plan_name": "Unlimited Premium",
+    "description": "True unlimited 5G with no throttling, 50GB premium hotspot, international roaming in 200+ countries, and priority network access.",
+    "data_allowance_gb": 999999,
+    "monthly_cost": 90.00,
+    "speed_mbps": 1000,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 50,
+      "international_roaming": true,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Maximum features, business executives, digital nomads, content creators, no compromise users"
+  },
+  {
+    "plan_id": "plan_family_30gb",
+    "plan_name": "Family Share 30GB",
+    "description": "Shared family plan with 30GB pooled data for up to 4 lines. Each line gets 5GB hotspot.",
+    "data_allowance_gb": 30,
+    "monthly_cost": 100.00,
+    "speed_mbps": 200,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 5,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Families with 2-4 members, shared data pool, cost savings for multiple lines"
+  },
+  {
+    "plan_id": "plan_family_unlimited",
+    "plan_name": "Family Unlimited",
+    "description": "Unlimited data for up to 5 family lines with individual 20GB hotspot per line and international features.",
+    "data_allowance_gb": 999999,
+    "monthly_cost": 180.00,
+    "speed_mbps": 500,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 20,
+      "international_roaming": true,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Large families, unlimited data per member, cost-effective for 3+ lines"
+  },
+  {
+    "plan_id": "plan_senior_3gb",
+    "plan_name": "Senior Essential 3GB",
+    "description": "Discounted plan for seniors (55+) with 3GB data, unlimited talk and text, and simplified billing.",
+    "data_allowance_gb": 3,
+    "monthly_cost": 20.00,
+    "speed_mbps": 50,
+    "features": {
+      "5g_enabled": false,
+      "hotspot_gb": 0,
+      "international_roaming": false,
+      "hd_streaming": false,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Seniors 55+, basic smartphone users, minimal data needs, emergency contacts"
+  },
+  {
+    "plan_id": "plan_business_100gb",
+    "plan_name": "Business Pro 100GB",
+    "description": "Business plan with 100GB priority 5G data, 40GB hotspot, international roaming, and dedicated business support.",
+    "data_allowance_gb": 100,
+    "monthly_cost": 95.00,
+    "speed_mbps": 1000,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 40,
+      "international_roaming": true,
+      "hd_streaming": true,
+      "family_discount": false,
+      "contract_months": 12,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Business professionals, sales teams, frequent business travelers, high data reliability needs"
+  },
+  {
+    "plan_id": "plan_student_15gb",
+    "plan_name": "Student 15GB",
+    "description": "Student-exclusive plan with 15GB data, free music streaming, and discounted rate for students with valid ID.",
+    "data_allowance_gb": 15,
+    "monthly_cost": 30.00,
+    "speed_mbps": 150,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 3,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "College students, online learning, social media, music streaming, budget-conscious young adults"
+  },
+  {
+    "plan_id": "plan_prepaid_10gb",
+    "plan_name": "Prepaid 10GB",
+    "description": "No-contract prepaid plan with 10GB data valid for 30 days. Pay as you go with no credit check.",
+    "data_allowance_gb": 10,
+    "monthly_cost": 40.00,
+    "speed_mbps": 100,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 2,
+      "international_roaming": false,
+      "hd_streaming": false,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "No credit check, temporary users, international visitors, flexible commitment"
+  },
+  {
+    "plan_id": "plan_iot_1gb",
+    "plan_name": "IoT Connected 1GB",
+    "description": "IoT and device connectivity plan with 1GB data for smartwatches, tablets, and connected devices.",
+    "data_allowance_gb": 1,
+    "monthly_cost": 10.00,
+    "speed_mbps": 25,
+    "features": {
+      "5g_enabled": false,
+      "hotspot_gb": 0,
+      "international_roaming": false,
+      "hd_streaming": false,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": false
+    },
+    "target_usage_profile": "Smartwatches, tablets, IoT devices, connected cars, wearables"
+  },
+  {
+    "plan_id": "plan_international_40gb",
+    "plan_name": "Global Traveler 40GB",
+    "description": "International-focused plan with 40GB data, free roaming in 210 countries, and international calling to 75+ countries.",
+    "data_allowance_gb": 40,
+    "monthly_cost": 75.00,
+    "speed_mbps": 400,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 15,
+      "international_roaming": true,
+      "hd_streaming": true,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Frequent international travelers, expats, business travelers, global connectivity needs"
+  },
+  {
+    "plan_id": "plan_rural_25gb",
+    "plan_name": "Rural Connect 25GB",
+    "description": "Plan optimized for rural areas with 25GB data on our extended network, includes priority rural tower access.",
+    "data_allowance_gb": 25,
+    "monthly_cost": 50.00,
+    "speed_mbps": 100,
+    "features": {
+      "5g_enabled": false,
+      "hotspot_gb": 10,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Rural residents, extended network coverage, reliable connectivity in low-density areas"
+  },
+  {
+    "plan_id": "plan_gaming_60gb",
+    "plan_name": "Gamer 60GB",
+    "description": "Gaming-optimized plan with 60GB ultra-low latency 5G data, 25GB hotspot, and priority routing for gaming traffic.",
+    "data_allowance_gb": 60,
+    "monthly_cost": 70.00,
+    "speed_mbps": 800,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 25,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Mobile gamers, cloud gaming, low-latency needs, game streaming, esports enthusiasts"
+  },
+  {
+    "plan_id": "plan_video_80gb",
+    "plan_name": "Video Streamer 80GB",
+    "description": "Content creator and video streamer plan with 80GB high-speed data, 4K streaming support, and 30GB hotspot.",
+    "data_allowance_gb": 80,
+    "monthly_cost": 75.00,
+    "speed_mbps": 600,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 30,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": true,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Content creators, vloggers, 4K video streaming, social media influencers, heavy video consumption"
+  },
+  {
+    "plan_id": "plan_data_only_50gb",
+    "plan_name": "Data Only 50GB",
+    "description": "Data-only plan for tablets and laptops with 50GB high-speed 5G data and no voice service.",
+    "data_allowance_gb": 50,
+    "monthly_cost": 45.00,
+    "speed_mbps": 500,
+    "features": {
+      "5g_enabled": true,
+      "hotspot_gb": 50,
+      "international_roaming": false,
+      "hd_streaming": true,
+      "family_discount": false,
+      "contract_months": 0,
+      "rollover_data": true
+    },
+    "target_usage_profile": "Tablets, laptops, data-only devices, secondary device connectivity, mobile broadband"
+  }
+]

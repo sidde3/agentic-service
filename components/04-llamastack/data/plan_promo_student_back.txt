@@ -1,0 +1,5 @@
+Plan: Back to School 20GB (ID: plan_promo_student_back)
+  Description: Special student plan for back to school season with 20GB data and student perks.
+  Data: 20GB | Cost: $35.0/mo | Speed: 250 Mbps
+  Features: 5G Enabled, Hotspot Gb: 5, Hd Streaming, Free Music Streaming, Student Discount
+  Target: Students returning to school, first-time smartphone users, parent-child plans

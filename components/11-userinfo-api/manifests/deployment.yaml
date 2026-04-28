@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userinfo-api
+  namespace: ${NS_SERVICES}
+  labels:
+    app: userinfo-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userinfo-api
+  template:
+    metadata:
+      labels:
+        app: userinfo-api
+    spec:
+      containers:
+      - name: userinfo-api
+        image: ${IMAGE_USERINFO_API}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+          name: http
+        env:
+        - name: DATABASE_URL
+          value: "postgresql+asyncpg://${PG_USERINFO_USER}:${PG_USERINFO_PASSWORD}@pgvector.${NS_PGVECTOR}.svc.cluster.local:5432/userinfo"
+        - name: PORT
+          value: "8000"
+        - name: SQL_ECHO
+          value: "false"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL

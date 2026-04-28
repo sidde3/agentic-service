@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-service
+  namespace: ${NS_SERVICES}
+  labels:
+    app: agent-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-service
+  template:
+    metadata:
+      labels:
+        app: agent-service
+    spec:
+      containers:
+        - name: agent-service
+          image: ${IMAGE_AGENT}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: LLAMA_STACK_ENDPOINT
+              value: "${LLAMASTACK_INTERNAL}"
+            - name: INFERENCE_MODEL
+              value: "${INFERENCE_MODEL}"
+            - name: VECTOR_DB_ID
+              value: "${VECTOR_DB_ID}"
+            - name: MCP_TOOLGROUP
+              value: "${MCP_TOOLGROUP}"
+            - name: PROMPTS_MOUNT_PATH
+              value: "/app/config/prompts"
+          volumeMounts:
+            - name: prompts
+              mountPath: /app/config/prompts
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: prompts
+          configMap:
+            name: agent-prompts

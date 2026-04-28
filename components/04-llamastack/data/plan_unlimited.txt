@@ -1,0 +1,5 @@
+Plan: Unlimited Premium (ID: plan_unlimited)
+  Description: Unlimited high-speed 5G data, unlimited hotspot at 3G speeds after 50GB, premium streaming.
+  Data: Unlimited | Cost: $85.0/mo | Speed: 1000 Mbps
+  Features: 5G Enabled, Hotspot Gb: 50, Unlimited Data, Hd Streaming, 4k Streaming, Priority Access
+  Target: Power users, unlimited streaming, heavy data consumption, no worries about limits

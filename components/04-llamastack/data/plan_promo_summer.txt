@@ -1,0 +1,5 @@
+Plan: Summer Special 40GB (ID: plan_promo_summer)
+  Description: Limited time promotional plan with 40GB data, 15GB hotspot, at special summer pricing.
+  Data: 40GB | Cost: $49.99/mo | Speed: 400 Mbps
+  Features: 5G Enabled, Hotspot Gb: 15, Hd Streaming, Rollover Data, Promotional Offer
+  Target: New customers, seasonal promotion, upgrade opportunity, limited time value

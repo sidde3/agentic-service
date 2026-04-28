@@ -1,0 +1,5 @@
+Plan: Senior 10GB (ID: plan_senior_10gb)
+  Description: Senior-friendly plan with 10GB data, unlimited calls, emergency services priority, special discounts.
+  Data: 10GB | Cost: $28.0/mo | Speed: 100 Mbps
+  Features: Hotspot Gb: 2, Emergency Priority, Senior Discount, Rollover Data
+  Target: Seniors 65+, basic smartphone needs, staying connected with family, emergency access

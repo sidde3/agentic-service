@@ -1,0 +1,46 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: bert-intent-runtime
+  namespace: ${NS_MODELS}
+  annotations:
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/template-display-name: BERT Intent Classification Runtime
+  labels:
+    opendatahub.io/dashboard: "true"
+spec:
+  annotations:
+    prometheus.io/port: "8080"
+    prometheus.io/path: /metrics
+  multiModel: false
+  supportedModelFormats:
+    - autoSelect: true
+      name: custom
+  containers:
+    - name: kserve-container
+      image: quay.io/sidde3/finetuned-phayathai-bert:latest
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+      env:
+        - name: MODEL_NAME
+          value: finetuned-phayathai-bert
+      resources:
+        limits:
+          cpu: "2"
+          memory: 4Gi
+        requests:
+          cpu: "1"
+          memory: 2Gi
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 10
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 15

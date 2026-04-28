@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: userinfo-api
+  namespace: ${NS_SERVICES}
+  labels:
+    app: userinfo-api
+spec:
+  to:
+    kind: Service
+    name: userinfo-api
+    weight: 100
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

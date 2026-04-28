@@ -1,0 +1,5 @@
+Plan: Premium 50GB (ID: plan_premium_50gb)
+  Description: Premium plan with 50GB ultra-fast 5G data, 20GB hotspot, priority network access.
+  Data: 50GB | Cost: $65.0/mo | Speed: 500 Mbps
+  Features: 5G Enabled, Hotspot Gb: 20, Hd Streaming, Family Discount, Priority Access, Rollover Data
+  Target: Heavy users, HD video streaming, mobile hotspot users, content consumption

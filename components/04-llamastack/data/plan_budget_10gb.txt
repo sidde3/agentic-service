@@ -1,0 +1,5 @@
+Plan: Budget Plus 10GB (ID: plan_budget_10gb)
+  Description: Great value with 10GB data, unlimited calls and texts, basic hotspot.
+  Data: 10GB | Cost: $35.0/mo | Speed: 100 Mbps
+  Features: Hotspot Gb: 2, Rollover Data
+  Target: Moderate users, social media browsing, occasional video streaming

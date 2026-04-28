@@ -1,0 +1,29 @@
+FROM registry.access.redhat.com/ubi9/python-311:latest
+
+USER 0
+
+WORKDIR /app
+
+# Copy dependencies
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy server
+COPY server.py .
+
+# Set permissions
+RUN chown -R 1001:0 /app && \
+    chmod -R g=u /app
+
+USER 1001
+
+EXPOSE 8000
+
+ENV PYTHONUNBUFFERED=1
+ENV USERINFO_API_URL="http://userinfo-api.user-info.svc.cluster.local:8000"
+
+# Run FastAPI server
+CMD ["python", "server.py"]

@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: agent-service
+  namespace: ${NS_SERVICES}
+spec:
+  to:
+    kind: Service
+    name: agent-service
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

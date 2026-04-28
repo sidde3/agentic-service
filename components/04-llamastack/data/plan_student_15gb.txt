@@ -1,0 +1,5 @@
+Plan: Student 15GB (ID: plan_student_15gb)
+  Description: Student-exclusive plan with 15GB data, free music streaming, and discounted rate for students with valid ID.
+  Data: 15GB | Cost: $30.0/mo | Speed: 150 Mbps
+  Features: 5G Enabled, Hotspot Gb: 3, Hd Streaming, Rollover Data, Free Music Streaming
+  Target: College students, online learning, social media, music streaming, budget-conscious young adults

@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-seed-userinfo
+  namespace: ${NS_PGVECTOR}
+  labels:
+    app: pgvector-setup
+    phase: db-seed
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: pgvector-setup
+        phase: db-seed
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: python:3.12-slim
+          command: ["sh", "-c"]
+          args:
+            - |
+              pip install --quiet psycopg2-binary && \
+              python /scripts/populate_postgres_userdata.py
+          env:
+            - name: POSTGRES_HOST
+              value: "pgvector.${NS_PGVECTOR}.svc.cluster.local"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "userinfo"
+            - name: POSTGRES_USER
+              value: "${PG_USERINFO_USER}"
+            - name: POSTGRES_PASSWORD
+              value: "${PG_USERINFO_PASSWORD}"
+            - name: DATA_FILE
+              value: "/data/sample_usage.json"
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: scripts
+          configMap:
+            name: db-seed-scripts
+        - name: data
+          configMap:
+            name: db-seed-data

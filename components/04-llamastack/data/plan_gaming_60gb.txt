@@ -1,0 +1,5 @@
+Plan: Gamer 60GB (ID: plan_gaming_60gb)
+  Description: Gaming-optimized plan with 60GB ultra-low latency 5G data, 25GB hotspot, and priority routing for gaming traffic.
+  Data: 60GB | Cost: $70.0/mo | Speed: 800 Mbps
+  Features: 5G Enabled, Hotspot Gb: 25, Hd Streaming, Family Discount, Rollover Data, Low Latency, Gaming Optimized
+  Target: Mobile gamers, cloud gaming, low-latency needs, game streaming, esports enthusiasts

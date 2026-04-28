@@ -1,0 +1,5 @@
+Plan: Work From Home 50GB (ID: plan_work_from_home)
+  Description: Optimized for remote work with 50GB data, high-speed hotspot, priority video conferencing.
+  Data: 50GB | Cost: $68.0/mo | Speed: 600 Mbps
+  Features: 5G Enabled, Hotspot Gb: 30, Hd Streaming, Video Conferencing Optimized, Priority Access, Rollover Data
+  Target: Remote workers, work from home professionals, video conferencing, virtual meetings, productivity apps

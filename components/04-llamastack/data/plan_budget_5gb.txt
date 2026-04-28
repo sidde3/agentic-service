@@ -1,0 +1,5 @@
+Plan: Budget 5GB (ID: plan_budget_5gb)
+  Description: Affordable plan with 5GB data, unlimited calls and texts, perfect for light users.
+  Data: 5GB | Cost: $25.0/mo | Speed: 50 Mbps
+  Features: Rollover Data
+  Target: Light users, seniors, basic phone usage, email and messaging only

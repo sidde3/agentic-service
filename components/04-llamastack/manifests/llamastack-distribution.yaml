@@ -1,0 +1,9 @@
+apiVersion: llamastack.redhat.com/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastack-custom-distribution
+  namespace: ${NS_LLAMASTACK}
+spec:
+  server:
+    userConfig:
+      configMapName: llamastack-user-config

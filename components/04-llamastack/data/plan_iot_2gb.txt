@@ -1,0 +1,5 @@
+Plan: IoT 2GB (ID: plan_iot_2gb)
+  Description: Data-only plan for tablets, smartwatches, IoT devices with 2GB monthly data.
+  Data: 2GB | Cost: $15.0/mo | Speed: 50 Mbps
+  Features: Data Only, Iot Optimized
+  Target: Tablets, smartwatches, connected cars, IoT devices, secondary devices

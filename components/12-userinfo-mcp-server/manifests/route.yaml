@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: userinfo-mcp-server
+  namespace: ${NS_SERVICES}
+  labels:
+    app: userinfo-mcp-server
+spec:
+  to:
+    kind: Service
+    name: userinfo-mcp-server
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

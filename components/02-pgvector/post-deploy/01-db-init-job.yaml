@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-init-sql
+  namespace: ${NS_PGVECTOR}
+data:
+  init.sql: |
+    -- Enable vector extension on the default database
+    CREATE EXTENSION IF NOT EXISTS vector;
+
+    -- userinfo database (MCP server user data)
+    SELECT 'CREATE DATABASE userinfo'
+      WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'userinfo')\gexec
+
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${PG_USERINFO_USER}') THEN
+        CREATE ROLE ${PG_USERINFO_USER} WITH LOGIN PASSWORD '${PG_USERINFO_PASSWORD}';
+      END IF;
+    END $$;
+    GRANT ALL PRIVILEGES ON DATABASE userinfo TO ${PG_USERINFO_USER};
+    ALTER DATABASE userinfo OWNER TO ${PG_USERINFO_USER};
+
+    -- llamastack database (Llama Stack internal state)
+    SELECT 'CREATE DATABASE llamastack'
+      WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'llamastack')\gexec
+
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${PG_LLAMASTACK_USER}') THEN
+        CREATE ROLE ${PG_LLAMASTACK_USER} WITH LOGIN PASSWORD '${PG_LLAMASTACK_PASSWORD}';
+      END IF;
+    END $$;
+    GRANT ALL PRIVILEGES ON DATABASE llamastack TO ${PG_LLAMASTACK_USER};
+    ALTER DATABASE llamastack OWNER TO ${PG_LLAMASTACK_USER};
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+  namespace: ${NS_PGVECTOR}
+  labels:
+    app: pgvector-setup
+    phase: db-init
+spec:
+  backoffLimit: 5
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: pgvector-setup
+        phase: db-init
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-pg
+          image: pgvector/pgvector:pg15
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Waiting for pgvector to accept connections..."
+              until pg_isready -h pgvector.${NS_PGVECTOR}.svc.cluster.local -U ${PGVECTOR_USER} -d ${PGVECTOR_DB}; do
+                sleep 3
+              done
+              echo "pgvector is ready."
+      containers:
+        - name: init
+          image: pgvector/pgvector:pg15
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "Running database initialization..."
+              psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
+                   -U "${PGVECTOR_USER}" \
+                   -d "${PGVECTOR_DB}" \
+                   -f /scripts/init.sql
+              echo ""
+              echo "Verifying databases..."
+              psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
+                   -U "${PGVECTOR_USER}" \
+                   -d "${PGVECTOR_DB}" \
+                   -tAc "SELECT datname FROM pg_database WHERE datname IN ('userinfo','llamastack','pgvector') ORDER BY datname;"
+              echo ""
+              echo "Verifying roles..."
+              psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
+                   -U "${PGVECTOR_USER}" \
+                   -d "${PGVECTOR_DB}" \
+                   -tAc "SELECT rolname FROM pg_roles WHERE rolname IN ('${PG_USERINFO_USER}','${PG_LLAMASTACK_USER}') ORDER BY rolname;"
+              echo ""
+              echo "Database initialization complete."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgvector-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: db-init-sql

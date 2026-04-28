@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usage-mcp-server-v2
+  namespace: ${NS_SERVICES}
+  labels:
+    app: usage-mcp-server-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: usage-mcp-server-v2
+  template:
+    metadata:
+      labels:
+        app: usage-mcp-server-v2
+    spec:
+      containers:
+        - name: mcp-server
+          image: ${IMAGE_USAGE_MCP}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MCP_SERVER_HOST
+              value: "0.0.0.0"
+            - name: MCP_SERVER_PORT
+              value: "8000"
+            - name: DB_HOST
+              value: "pgvector.${NS_PGVECTOR}.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "userinfo"
+            - name: DB_USER
+              value: "${PG_USERINFO_USER}"
+            - name: DB_PASSWORD
+              value: "${PG_USERINFO_PASSWORD}"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usage-mcp-server-v2
+  namespace: ${NS_SERVICES}
+  labels:
+    app: usage-mcp-server-v2
+spec:
+  type: ClusterIP
+  selector:
+    app: usage-mcp-server-v2
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: usage-mcp-server-v2
+  namespace: ${NS_SERVICES}
+  labels:
+    app: usage-mcp-server-v2
+  annotations:
+    openshift.io/description: "Troubleshooting route — can be removed in production"
+spec:
+  to:
+    kind: Service
+    name: usage-mcp-server-v2
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
