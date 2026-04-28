@@ -153,11 +153,19 @@ class MobilePlanAgent:
         """
         vector_db_id = self.tool_config.vector_db_id
         if not vector_db_id or not self.reranker.enabled:
+            logger.info("[SEARCH+RERANK] Skipped (vector_db_id=%s, reranker=%s)",
+                        vector_db_id or "not set",
+                        "enabled" if self.reranker.enabled else "disabled")
             return None
 
         top_k = int(os.getenv("RERANK_TOP_K", "20"))
 
         try:
+            logger.info("=" * 60)
+            logger.info("[SEARCH+RERANK] Starting vector search + rerank pipeline")
+            logger.info("[SEARCH+RERANK] Query: %s", query)
+            logger.info("[SEARCH+RERANK] Vector store: %s, top_k=%d", vector_db_id, top_k)
+
             search_resp = self._api(
                 "post",
                 f"/v1/vector_stores/{vector_db_id}/search",
@@ -166,7 +174,7 @@ class MobilePlanAgent:
 
             results = search_resp.get("data", [])
             if not results:
-                logger.info("Vector search returned no results")
+                logger.info("[SEARCH+RERANK] Vector search returned 0 results — skipping rerank")
                 return None
 
             documents = []
@@ -179,9 +187,10 @@ class MobilePlanAgent:
                     documents.append(str(content))
 
             if not documents:
+                logger.info("[SEARCH+RERANK] No extractable text from %d results — skipping rerank", len(results))
                 return None
 
-            logger.info("Vector search returned %d candidates, reranking ...", len(documents))
+            logger.info("[SEARCH+RERANK] Vector search returned %d candidates, sending to reranker ...", len(documents))
             reranked = self.reranker.rerank(query, documents)
 
             context_parts = []
@@ -190,10 +199,12 @@ class MobilePlanAgent:
                     f"Plan {i} (relevance: {doc['relevance_score']:.3f}):\n{doc['text']}"
                 )
 
+            logger.info("[SEARCH+RERANK] Injecting %d reranked plans into LLM context", len(reranked))
+            logger.info("=" * 60)
             return "\n\n".join(context_parts)
 
         except Exception as e:
-            logger.warning("Search and rerank failed: %s", e)
+            logger.warning("[SEARCH+RERANK] Pipeline failed, proceeding without reranked context: %s", e)
             return None
 
     def _create_turn_streaming(
@@ -229,6 +240,9 @@ class MobilePlanAgent:
         text_parts: List[str] = []
         tool_calls: List[Dict[str, Any]] = []
         errors: List[str] = []
+        step_count = 0
+
+        logger.info("[LLM] Starting agentic turn (model=%s)", self.model_id)
 
         with httpx.Client(verify=False, timeout=180) as client:
             with client.stream("POST", url, json=body) as resp:
@@ -244,7 +258,9 @@ class MobilePlanAgent:
                         continue
 
                     if "error" in event:
-                        errors.append(event["error"].get("message", str(event["error"])))
+                        err_msg = event["error"].get("message", str(event["error"]))
+                        logger.warning("[LLM] Error from Llama Stack: %s", err_msg)
+                        errors.append(err_msg)
                         continue
 
                     # Every event has: event -> payload -> event_type
@@ -260,24 +276,32 @@ class MobilePlanAgent:
                         if tool_delta and tool_delta.get("parse_status") == "succeeded":
                             tc = tool_delta.get("tool_call", {})
                             if tc:
+                                tool_name = tc.get("tool_name", "unknown")
+                                logger.info("[TOOLCALL] LLM invoked tool: %s", tool_name)
                                 tool_calls.append({
-                                    "tool_name": tc.get("tool_name", "unknown"),
+                                    "tool_name": tool_name,
                                     "arguments": tc.get("arguments", {}),
                                 })
 
                     # --- A full step finished (inference or tool execution) ---
                     elif etype == "step_complete":
+                        step_count += 1
                         step_detail = payload.get("step_details", {})
                         step_type = step_detail.get("step_type", "")
 
                         if step_type == "tool_execution":
                             for tr in step_detail.get("tool_responses", []):
+                                t_name = tr.get("tool_name", "unknown")
+                                t_content = tr.get("content", "")
+                                preview = str(t_content)[:120].replace("\n", " ")
+                                logger.info("[TOOLCALL] Tool '%s' returned: %s...", t_name, preview)
                                 tool_calls.append({
-                                    "tool_name": tr.get("tool_name", "unknown"),
-                                    "content": tr.get("content", ""),
+                                    "tool_name": t_name,
+                                    "content": t_content,
                                 })
 
                         if step_type == "inference":
+                            logger.info("[LLM] Inference step %d complete", step_count)
                             mc = step_detail.get("model_response", {})
                             content = mc.get("content", "")
                             if isinstance(content, str) and content and not text_parts:
@@ -292,6 +316,10 @@ class MobilePlanAgent:
                             text_parts = [content]
 
         reply = "".join(text_parts).strip()
+        logger.info(
+            "[LLM] Turn complete — %d steps, %d tool calls, reply length=%d chars",
+            step_count, len(tool_calls), len(reply),
+        )
         return {
             "reply": reply,
             "tool_calls": tool_calls,
@@ -318,6 +346,11 @@ class MobilePlanAgent:
         if not session_id:
             session_id = f"session_{uuid.uuid4().hex[:16]}"
 
+        logger.info("=" * 60)
+        logger.info("[AGENT] New recommendation request")
+        logger.info("[AGENT]   user_id=%s  intent=%s  session=%s", user_id, intent, session_id)
+        logger.info("[AGENT]   query: %s", query)
+
         try:
             if not self._agents:
                 self._refresh_mcp_status()
@@ -335,9 +368,13 @@ class MobilePlanAgent:
                     parts.append(f"  {role}: {msg['content']}")
 
             if self.reranker.enabled and intent != "MOBILE_USAGE_CHECK_DATA_CURRENT":
+                logger.info("[RECOMMEND] Reranker is enabled — performing search+rerank for query: %s", query)
                 reranked_context = self._search_and_rerank(query)
                 if reranked_context:
                     parts.append(f"\nRelevant plans (reranked):\n{reranked_context}")
+                    logger.info("[RECOMMEND] Reranked plan context added to LLM prompt")
+                else:
+                    logger.info("[RECOMMEND] No reranked context available — LLM will use RAG toolgroup only")
 
             parts.append(f"\nUser Query: {query}")
 
@@ -346,11 +383,10 @@ class MobilePlanAgent:
                 agent_id, ls_session, [{"role": "user", "content": user_message}]
             )
 
-            logger.info(
-                "Recommendation completed: %d tool calls, errors=%s",
-                len(result["tool_calls"]),
-                result["has_errors"],
-            )
+            tool_names = list({tc["tool_name"] for tc in result["tool_calls"]})
+            logger.info("[AGENT] Recommendation complete — tools used: %s, errors=%s",
+                        tool_names or "none", result["has_errors"])
+            logger.info("=" * 60)
 
             return {
                 "session_id": session_id,
@@ -359,9 +395,7 @@ class MobilePlanAgent:
                 "reply": result["reply"],
                 "recommendations": [],
                 "tool_calls": result["tool_calls"],
-                "tool_call_summary": list({
-                    tc["tool_name"] for tc in result["tool_calls"]
-                }),
+                "tool_call_summary": tool_names,
                 "has_errors": result["has_errors"],
                 "errors": result["errors"],
                 "status": "success" if not result["has_errors"] else "partial",
@@ -390,6 +424,8 @@ class MobilePlanAgent:
         if not session_id:
             session_id = f"simple_{uuid.uuid4().hex[:16]}"
 
+        logger.info("[AGENT] Simple query — session=%s query=%s", session_id, query)
+
         try:
             agent_id = self._ensure_agent()
             ls_session = self._create_session(agent_id, session_id)
@@ -398,6 +434,7 @@ class MobilePlanAgent:
                 agent_id, ls_session, [{"role": "user", "content": query}]
             )
 
+            logger.info("[AGENT] Simple query complete — reply length=%d", len(result["reply"]))
             return {
                 "session_id": session_id,
                 "query": query,

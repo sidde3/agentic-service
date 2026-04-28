@@ -8,19 +8,26 @@ Redis structure (one key per user):
     Key:   chat:{username}
     Value: JSON string —
         {
+            "user_message": "latest user message text",
+            "intent": "MOBILE_SIM_ACTIVATION_POSTPAID",
             "session_id": "a3f5c7d2-...",
             "user_id": "jessica.thompson@example.com",
             "username": "jessica_thompson",
             "session_history": [
-                {"role": "user",      "content": "..."},
                 {"role": "assistant", "content": "..."},
+                {"role": "user",      "content": "..."},
                 ...
             ]
         }
 
+    user_message — always the latest user question for this session.
+    intent       — classified intent for the latest user_message.
+    session_history — full conversation (trimmed to max_turns), including
+                      the latest user+assistant pair after processing.
+
 PostgreSQL table:
     chat_sessions (username TEXT PK, history JSONB)
-    — one row per user, overwritten on every turn.
+    — one row per user, overwritten on every turn (same blob as Redis).
 """
 
 from __future__ import annotations
@@ -76,6 +83,7 @@ class SessionManager:
         session_id: str,
         user_message: str,
         assistant_content: str,
+        intent: str = "UNKNOWN",
     ) -> int:
         """Append a turn, trim to max_turns, and save back with TTL.
 
@@ -90,6 +98,8 @@ class SessionManager:
 
         session["session_id"] = session_id
         session["user_id"] = user_id
+        session["user_message"] = user_message
+        session["intent"] = intent
 
         session["session_history"].append({"role": "user", "content": user_message})
         session["session_history"].append({"role": "assistant", "content": assistant_content})

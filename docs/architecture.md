@@ -24,6 +24,7 @@ flowchart TB
       BERT[finetuned-phayathai-bert]
       Qwen[qwen25-7b-instruct AWQ]
       BGE[bge-small-en-v15 — embedding]
+      Reranker[qwen3-reranker-06b]
     end
     subgraph ls [llamastack namespace]
       LS[LlamaStackDistribution]
@@ -47,6 +48,8 @@ flowchart TB
     Router --> Redis
     Router --> DB2
     Agent --> LS
+    Agent -->|vector search| LS
+    Agent -->|rerank top-K| Reranker
     LS --> UserInfoMCP
     UserInfoMCP --> UserInfoAPI
     UserInfoAPI --> DB2
@@ -67,13 +70,14 @@ Database initialization and seeding happen via **Kubernetes Jobs** triggered by 
 
 ## Models
 
-Three models must be pre-deployed as **KServe InferenceServices** before running the deployment script. Reference manifests are in `components/03-models/reference/`.
+The following models must be pre-deployed as **KServe InferenceServices** before running the deployment script. Reference manifests are in `components/03-models/reference/`.
 
 | Model | Used By | Purpose |
 |-------|---------|---------|
 | `qwen25-7b-instruct` (AWQ) | **LlamaStack** | Decoder LLM for reasoning, tool calling, and plan comparison |
 | `finetuned-phayathai-bert` | **Router** | Intent classification — classifies user messages into 10 mobile-service intents |
 | `bge-small-en-v15` | **LlamaStack** | Embedding model for semantic search (384-dimensional vectors) |
+| `qwen3-reranker-06b` (optional) | **Agent** | Cross-encoder reranker — reranks vector search results for higher relevance before LLM reasoning |
 
 ## LlamaStack
 
@@ -95,10 +99,10 @@ The **LlamaStackDistribution** provides a unified API layer:
    - Other intents return stub responses
    - Stores session transcript in Redis, archives to Postgres
 3. **Agent** (08) receives `/recommend`:
+   - For plan comparison intents: searches the vector store via LlamaStack (top-K candidates), sends them to the **Qwen3-Reranker** for cross-encoder reranking, and injects the top-N most relevant plans into the LLM context
    - Creates a LlamaStack agent session with MCP tools + RAG toolgroups
    - LlamaStack invokes Qwen for reasoning, calls MCP tools as needed
    - For usage checks: calls `userinfo-mcp-server` tools (user data, subscriptions, usage)
-   - For plan comparison: also triggers `builtin::rag` knowledge search over mobile plan documents
 4. **LlamaStack** orchestrates tool calls → **UserInfo MCP** (12) → **UserInfo API** (11) → **userinfo DB** (02)
 5. Response streams back through Agent → Router → UI
 

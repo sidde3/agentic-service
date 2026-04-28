@@ -2,51 +2,7 @@
 
 Multi-turn customer-service chat system powered by fine-tuned BERT intent classification and an LLM-driven agentic workflow on **Red Hat OpenShift AI**.
 
-A user messages through a **Streamlit Chat UI**. The **Router** classifies the message via a fine-tuned **PhayaThai BERT** model. Data-plan intents are forwarded to an **Agent** that orchestrates **LlamaStack** — combining MCP tools (live user data via UserInfo API) with pgvector RAG (plan catalog search) — and returns a personalised recommendation powered by **Qwen 2.5 7B**.
-
-## Architecture
-
-```mermaid
-flowchart TB
-  subgraph cluster [OpenShift Cluster]
-    subgraph pgNS [pgvector namespace]
-      PG[(pgvector)]
-      DB1[llamastack DB]
-      DB2[userinfo DB]
-      DB3[pgvector DB]
-    end
-    subgraph models [models namespace]
-      BERT[BERT — intent classification]
-      Qwen[Qwen 2.5 7B AWQ]
-      BGE[BGE-small — embeddings]
-    end
-    subgraph ls [llamastack namespace]
-      LS[LlamaStack Distribution]
-    end
-    subgraph svc [agentic-service namespace]
-      Redis[(Redis)]
-      Router[Router]
-      Agent[Agent]
-      UsageMCP[Usage MCP]
-      HelloMCP[HelloWorld MCP]
-      UserInfoAPI[UserInfo API]
-      UserInfoMCP[UserInfo MCP]
-    end
-    Client[Chat UI] --> Router
-    Router --> BERT
-    Router -->|agent intents| Agent
-    Router --> Redis
-    Router --> DB2
-    Agent --> LS
-    LS --> Qwen
-    LS --> BGE
-    LS --> DB1
-    LS --> DB3
-    LS --> UserInfoMCP
-    UserInfoMCP --> UserInfoAPI
-    UserInfoAPI --> DB2
-  end
-```
+A user messages through a **Streamlit Chat UI**. The **Router** classifies the message via a fine-tuned **PhayaThai BERT** model. Data-plan intents are forwarded to an **Agent** that orchestrates **LlamaStack** — combining MCP tools (live user data via UserInfo API) with pgvector RAG (plan catalog search) and **Qwen3-Reranker** for post-retrieval reranking — and returns a personalised recommendation powered by **Qwen 2.5 7B**.
 
 ## Components
 
@@ -95,7 +51,7 @@ See the full [Deployment Guide](docs/deployment-guide.md) for details.
 
 - **Platform**: Red Hat OpenShift AI with KServe
 - **LLM Orchestration**: LlamaStack (MCP + pgvector + Agents API)
-- **Models**: Qwen 2.5 7B Instruct AWQ (vLLM), PhayaThai BERT (intent), BGE-small (embeddings)
+- **Models**: Qwen 2.5 7B Instruct AWQ (vLLM), PhayaThai BERT (intent), BGE-small (embeddings), Qwen3-Reranker (reranking)
 - **Backend**: Python 3.11+, FastAPI, SQLAlchemy, asyncpg, httpx
 - **Session Store**: Redis
 - **Database**: PostgreSQL 15 + pgvector

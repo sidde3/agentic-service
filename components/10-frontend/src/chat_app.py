@@ -101,6 +101,14 @@ with st.sidebar:
     st.markdown(f"**Session:** `{st.session_state.session_id[:12]}...`")
 
     if st.button("🔄 New Session"):
+        try:
+            with httpx.Client(verify=False, timeout=30) as client:
+                client.post(
+                    f"{ROUTER_URL}/logout",
+                    json={"user_id": st.session_state.user_email},
+                )
+        except Exception:
+            pass
         st.session_state.session_id = str(uuid.uuid4())
         st.session_state.messages = []
         st.session_state.user_info = None

@@ -39,6 +39,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response
 from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
+from pydantic import BaseModel, Field
+
 from .models import ChatRequest, ChatResponse
 from .classifier import BERTClassifier, Taxonomy, StubBackend, UserLookup
 from .session import SessionManager, Archiver
@@ -67,7 +69,7 @@ DATABASE_URL = os.getenv(
 
 VLLM_API_URL = os.getenv("VLLM_API_URL", "http://localhost:8080")
 VLLM_API_TOKEN = os.getenv("VLLM_API_TOKEN", "")
-MODEL_NAME = os.getenv("MODEL_NAME", "finetuned-phayathai-bert")
+MODEL_NAME = os.getenv("MODEL_NAME", "phayathaibert")
 
 _CONFIG_MOUNT = os.getenv("CONFIG_MOUNT_PATH", "")
 _DEFAULT_INTENTS = str(Path(__file__).parent / "config" / "intents")
@@ -230,7 +232,7 @@ async def root():
     return {
         "service": "intent-classifier-router",
         "status": "running",
-        "endpoints": ["/health", "/ready", "/chat", "/config", "/metrics"],
+        "endpoints": ["/health", "/ready", "/chat", "/logout", "/config", "/metrics"],
     }
 
 
@@ -303,6 +305,45 @@ async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+# ── POST /logout ──────────────────────────────────────────────────────
+
+class LogoutRequest(BaseModel):
+    user_id: str = Field(..., description="User email address")
+
+
+@app.post("/logout")
+async def logout_endpoint(req: LogoutRequest, request: Request):
+    """Archive the user's session to Postgres and clear the Redis cache."""
+    start = time.time()
+    sm: SessionManager = request.app.state.session_mgr
+    archiver: Optional[Archiver] = request.app.state.archiver
+    user_lookup: Optional[UserLookup] = request.app.state.user_lookup
+
+    resolved_user = None
+    if user_lookup:
+        resolved_user = await user_lookup.resolve(req.user_id)
+    username = resolved_user["username"] if resolved_user else req.user_id
+
+    logger.info("[SESSION] Logout requested for user '%s'", username)
+
+    session = await sm.get_session(username)
+    if session:
+        turns = len(session.get("session_history", [])) // 2
+        logger.info("[SESSION] Found live session for '%s' (%d turns) — archiving before clear", username, turns)
+        if archiver:
+            await archiver.archive_session(username, delete_redis=True)
+            logger.info("[SESSION] Session archived to Postgres and cleared from Redis for '%s'", username)
+        else:
+            await sm.delete(username)
+            logger.info("[SESSION] Session cleared from Redis for '%s' (no archiver configured)", username)
+    else:
+        logger.info("[SESSION] No live session found for '%s' — nothing to clear", username)
+
+    elapsed = (time.time() - start) * 1000
+    logger.info("[SESSION] Logout complete for '%s' in %.0fms", username, elapsed)
+    return {"status": "ok", "username": username, "cleared": session is not None}
+
+
 # ── POST /chat ────────────────────────────────────────────────────────
 
 @app.post("/chat", response_model=ChatResponse)
@@ -336,6 +377,14 @@ async def chat_endpoint(req: ChatRequest, request: Request):
         # Username is the key for Redis/Postgres sessions.
         # Falls back to the raw user_id (email) if lookup fails.
         username = resolved_user["username"] if resolved_user else req.user_id
+
+        # ── Session check ─────────────────────────────────────────
+        existing_session = await sm.get_session(username)
+        if existing_session:
+            turns = len(existing_session.get("session_history", [])) // 2
+            logger.info("[SESSION] Live session found for '%s' — %d turns in Redis", username, turns)
+        else:
+            logger.info("[SESSION] No existing session for '%s' — starting fresh", username)
 
         # ── Intent resolution ─────────────────────────────────────
         if req.predefined_intent:
@@ -391,6 +440,11 @@ async def chat_endpoint(req: ChatRequest, request: Request):
         assistant_ctx = build_assistant_context(reply, backend_data)
         new_length = await sm.append(
             username, req.user_id, session_id, req.message, assistant_ctx,
+            intent=intent,
+        )
+        logger.info(
+            "[SESSION] Updated session for '%s' — now %d entries (%d turns, max=%d)",
+            username, new_length, new_length // 2, MAX_TURNS,
         )
 
         intent_predictions_total.labels(intent=intent).inc()
@@ -400,6 +454,8 @@ async def chat_endpoint(req: ChatRequest, request: Request):
             should_archive = new_length >= 10 or "ERROR" in intent
             delete_redis = intent in GOODBYE_INTENTS
             if should_archive or delete_redis:
+                logger.info("[SESSION] Triggering archive for '%s' (length=%d, goodbye=%s)",
+                            username, new_length, delete_redis)
                 asyncio.create_task(
                     archiver.archive_session(username, delete_redis)
                 )
