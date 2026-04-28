@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
+from .reranker import Reranker
 from .tools import AgentToolConfig, create_tool_config, validate_tool_configuration
 from .prompts import (
     MOBILE_PLAN_AGENT_PROMPT,
@@ -58,13 +59,15 @@ class MobilePlanAgent:
             mcp_toolgroup=mcp_toolgroup, vector_db_id=vector_db_id
         )
         validate_tool_configuration(self.tool_config, self.endpoint)
+        self.reranker = Reranker()
 
         self._agents: Dict[str, str] = {}
 
         logger.info(
-            "Initialized MobilePlanAgent endpoint=%s model=%s",
+            "Initialized MobilePlanAgent endpoint=%s model=%s reranker=%s",
             self.endpoint,
             self.model_id,
+            "enabled" if self.reranker.enabled else "disabled",
         )
 
     def _api(
@@ -141,6 +144,57 @@ class MobilePlanAgent:
             json={"session_name": name},
         )
         return resp["session_id"]
+
+    def _search_and_rerank(self, query: str) -> Optional[str]:
+        """Search the vector store and rerank results.
+
+        Returns a formatted context string to prepend to the user message,
+        or None if the vector store is not configured or search fails.
+        """
+        vector_db_id = self.tool_config.vector_db_id
+        if not vector_db_id or not self.reranker.enabled:
+            return None
+
+        top_k = int(os.getenv("RERANK_TOP_K", "20"))
+
+        try:
+            search_resp = self._api(
+                "post",
+                f"/v1/vector_stores/{vector_db_id}/search",
+                json={"query": query, "top_k": top_k},
+            )
+
+            results = search_resp.get("data", [])
+            if not results:
+                logger.info("Vector search returned no results")
+                return None
+
+            documents = []
+            for r in results:
+                content = r.get("content", "")
+                if isinstance(content, list) and content:
+                    if isinstance(content[0], dict) and content[0].get("type") == "text":
+                        content = content[0].get("text", "")
+                if content:
+                    documents.append(str(content))
+
+            if not documents:
+                return None
+
+            logger.info("Vector search returned %d candidates, reranking ...", len(documents))
+            reranked = self.reranker.rerank(query, documents)
+
+            context_parts = []
+            for i, doc in enumerate(reranked, 1):
+                context_parts.append(
+                    f"Plan {i} (relevance: {doc['relevance_score']:.3f}):\n{doc['text']}"
+                )
+
+            return "\n\n".join(context_parts)
+
+        except Exception as e:
+            logger.warning("Search and rerank failed: %s", e)
+            return None
 
     def _create_turn_streaming(
         self,
@@ -279,6 +333,12 @@ class MobilePlanAgent:
                 for msg in session_history[-5:]:
                     role = msg["role"].capitalize()
                     parts.append(f"  {role}: {msg['content']}")
+
+            if self.reranker.enabled and intent != "MOBILE_USAGE_CHECK_DATA_CURRENT":
+                reranked_context = self._search_and_rerank(query)
+                if reranked_context:
+                    parts.append(f"\nRelevant plans (reranked):\n{reranked_context}")
+
             parts.append(f"\nUser Query: {query}")
 
             user_message = "\n".join(parts)

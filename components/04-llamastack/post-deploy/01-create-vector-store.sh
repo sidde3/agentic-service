@@ -8,7 +8,7 @@ source "$(dirname "$0")/../../.env.computed" 2>/dev/null || true
 
 LLAMASTACK_URL="${LLAMASTACK_URL:-https://llamastack-${NS_LLAMASTACK:-llamastack}.${CLUSTER_DOMAIN}}"
 VECTOR_STORE_NAME="${VECTOR_STORE_NAME:-mobile-plans}"
-EMBEDDING_MODEL="${EMBEDDING_MODEL:-all-MiniLM-L6-v2}"
+EMBEDDING_MODEL="${EMBEDDING_MODEL:-vllm-bge-small/bge-small-en-v15}"
 EMBEDDING_DIM="${EMBEDDING_DIM:-384}"
 
 echo "======================================"

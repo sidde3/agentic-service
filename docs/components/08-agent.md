@@ -31,6 +31,12 @@ Core agent logic:
 - **`_create_turn_streaming()`** — Sends user message to LlamaStack's turn API (SSE streaming), parses events to extract tool calls, inference steps, and the final response
 - **`get_recommendation()`** / **`get_simple_response()`** — High-level methods for the endpoints
 
+### `src/agent/reranker.py`
+Post-retrieval reranker:
+- **`Reranker`** class — Calls an external reranker model (e.g. Qwen3-Reranker) via `/v1/rerank` endpoint
+- For plan comparison intents, the agent searches the vector store (top-K candidates), sends them to the reranker for cross-encoder reranking, and injects the top-N most relevant plans into the LLM context
+- Gracefully degrades: if `RERANKER_URL` or `RERANKER_MODEL` are not set, reranking is skipped
+
 ### `src/agent/tools.py`
 Tool configuration:
 - **`AgentToolConfig`** — Reads `MCP_TOOLGROUP` and `VECTOR_DB_ID` from environment
@@ -57,6 +63,10 @@ System prompts for the agent. Supports file-based overrides via `PROMPTS_MOUNT_P
 | `INFERENCE_MODEL` | — | Model identifier (e.g. `vllm-inference/qwen25-7b-instruct`) |
 | `VECTOR_DB_ID` | `auto` | Vector store ID for RAG |
 | `MCP_TOOLGROUP` | `userinfo-mcp-server` | MCP toolgroup registered in LlamaStack |
+| `RERANKER_URL` | — | Reranker endpoint (e.g. `https://.../v1/rerank`). If not set, reranking is disabled |
+| `RERANKER_MODEL` | — | Reranker model name (e.g. `Qwen/Qwen3-Reranker-0.6B`) |
+| `RERANK_TOP_K` | `20` | Number of candidates to retrieve from vector search |
+| `RERANK_TOP_N` | `5` | Number of top results after reranking to include in LLM context |
 | `PROMPTS_MOUNT_PATH` | `/app/config/prompts` | Directory for prompt override files |
 
 ## Connections

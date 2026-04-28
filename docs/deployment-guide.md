@@ -20,6 +20,8 @@ Three AI models must be deployed as KServe InferenceServices **before** running 
 
 3. **`bge-small-en-v15`** — Embedding model for semantic search. **LlamaStack** uses this model to generate vector embeddings when ingesting plan documents and when the agent performs `knowledge_search` against the plan catalog.
 
+4. **`qwen3-reranker-06b`** (optional) — Cross-encoder reranker model. The **Agent** calls this model to rerank vector search results before passing them to the LLM, improving plan recommendation quality. If not deployed, the agent falls back to raw vector similarity ranking.
+
 Deploy these via the OpenShift AI dashboard or by manually applying the reference manifests in `components/03-models/reference/`.
 
 ## Quick Start

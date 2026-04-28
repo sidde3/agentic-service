@@ -17,7 +17,7 @@ import streamlit as st
 
 ROUTER_URL = os.getenv(
     "ROUTER_URL",
-    "http://router-service:8000",
+    "https://router-service-agentic-service.apps.ocp.bhqd8.sandbox1981.opentlc.com",
 )
 DEFAULT_USER_EMAIL = os.getenv("DEFAULT_USER_EMAIL", "jessica.thompson@example.com")
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "120"))
