@@ -33,10 +33,7 @@ echo "  Models NS:          $NS_MODELS (hard prerequisite)"
 echo "  Vector Ingestion:   ${ENABLE_VECTOR_INGESTION:-true}"
 echo "============================================================"
 
-# ── Create the application namespace ─────────────────────────────────────
-# All workloads (pgvector, llamastack, services) share a single namespace.
-# Only models live in NS_MODELS (deployed separately via OpenShift AI).
-oc get ns "$NS_SERVICES" &>/dev/null || oc new-project "$NS_SERVICES" --skip-config-write 2>/dev/null || oc create ns "$NS_SERVICES"
+# Namespace must already exist (configure NS_* in config/env.properties).
 
 COMPONENTS_DIR="$REPO_ROOT/components"
 local_computed="$REPO_ROOT/components/.env.computed"

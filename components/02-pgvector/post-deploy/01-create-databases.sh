@@ -18,9 +18,9 @@ oc delete job "$JOB_NAME" -n "$NS" --ignore-not-found 2>/dev/null
 oc delete configmap db-init-sql -n "$NS" --ignore-not-found 2>/dev/null
 sleep 2
 
-# Apply the Job manifest (${VAR} from environment via python3)
+# Apply the Job manifest (scripts/apply-manifest.sh expands ${VAR})
 echo "  Applying $JOB_NAME Job ..."
-python3 "$REPO_ROOT/scripts/substitute_manifest.py" < "$SCRIPT_DIR/01-db-init-job.yaml" | oc apply -f -
+bash "$REPO_ROOT/scripts/apply-manifest.sh" "$SCRIPT_DIR/01-db-init-job.yaml"
 
 # Wait for the Job to complete
 echo "  Waiting for Job/$JOB_NAME to complete (timeout 120s) ..."

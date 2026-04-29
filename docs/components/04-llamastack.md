@@ -44,9 +44,10 @@ The distribution enables these APIs (all under the LlamaStack route):
 
 | File | Resource |
 |------|----------|
-| `namespace.yaml` | Namespace `${NS_LLAMASTACK}` |
 | `llamastack-distribution.yaml` | LlamaStackDistribution CR |
 | `llamastack-user-config.yaml` | ConfigMap with `run.yaml` |
+
+The namespace `${NS_LLAMASTACK}` is **not** created here; it must already exist.
 
 ## Configuration
 

@@ -8,7 +8,8 @@ Step-by-step instructions for deploying the AI Agentic Use Case on an OpenShift 
 - Red Hat OpenShift AI operator installed (with LlamaStack operator support)
 - `oc` CLI authenticated to the cluster
 - At least 1 NVIDIA GPU (T4/L40) for Qwen model serving
-- `python3` available on the machine that runs deploy scripts (used to expand `${VAR}` in manifests; no `gettext`/`envsubst` required)
+- `python3` available on the machine that runs deploy scripts (used by `scripts/apply-manifest.sh` to expand `${VAR}` in YAML; no `gettext`/`envsubst` required)
+- **`NS_SERVICES` (and thus `NS_PGVECTOR` / `NS_LLAMASTACK` when set to the same name) must already exist** — deploy scripts do not create the project/namespace.
 
 ### Required AI Models (must be pre-deployed)
 
@@ -36,7 +37,11 @@ git clone <repo-url> && cd ais-agentic-usecase
 cp config/env.properties.example config/env.properties
 # Edit config/env.properties with your cluster values
 
-# 3. Deploy everything
+# 3. Create the application namespace (values from config/env.properties)
+set -a && source config/env.properties && set +a
+oc new-project "${NS_SERVICES}" --skip-config-write 2>/dev/null || true
+
+# 4. Deploy everything
 bash scripts/deploy-all.sh
 ```
 
@@ -56,7 +61,7 @@ To wipe the application namespace and deploy again from a clean slate:
 
 3. **Models namespace:** This guide assumes models live in **`NS_MODELS`** (often a separate namespace). Deleting only **`NS_SERVICES`** does not remove InferenceServices; that is usually what you want so you do not have to re-import models.
 
-4. **Redeploy:** Run `bash scripts/deploy-all.sh` again. The script recreates **`NS_SERVICES`** if it is missing.
+4. **Redeploy:** Create the project/namespace again if needed (`oc new-project …`), then run `bash scripts/deploy-all.sh`.
 
 ## Configuration
 

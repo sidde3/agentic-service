@@ -80,18 +80,14 @@ USERINFO_API_URL=$USERINFO_API_URL
 EOF
 }
 
-# ── Apply a manifest directory (${VAR} from environment via python3) ────
+# ── Apply a manifest directory (see scripts/apply-manifest.sh) ──────────
 apply_manifests() {
     local manifest_dir="$1"
     if [[ ! -d "$manifest_dir" ]]; then
         echo "  (no manifests/ directory — skipping)"
         return 0
     fi
-    for yaml_file in "$manifest_dir"/*.yaml; do
-        [[ -f "$yaml_file" ]] || continue
-        echo "  Applying $(basename "$yaml_file") ..."
-        python3 "${REPO_ROOT}/scripts/substitute_manifest.py" < "$yaml_file" | oc apply -f -
-    done
+    bash "${REPO_ROOT}/scripts/apply-manifest.sh" "$manifest_dir"
 }
 
 # ── Wait for a deployment to roll out ───────────────────────────────────

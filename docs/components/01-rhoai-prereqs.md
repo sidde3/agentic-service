@@ -24,7 +24,7 @@ The ConfigMap contains JSON entries for each MCP server:
 
 ## Configuration
 
-No environment variables. Uses `${NS_SERVICES}` via `scripts/substitute_manifest.py` at deploy time.
+No environment variables. Uses `${NS_SERVICES}` via `scripts/apply-manifest.sh` at deploy time.
 
 ## Connections
 

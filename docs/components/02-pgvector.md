@@ -31,8 +31,9 @@ Rich JSON profiles used by `populate_postgres_userdata.py` for local or custom s
 
 | File | Resource |
 |------|----------|
-| `manifests/namespace.yaml` | Namespace `${NS_PGVECTOR}` |
 | `manifests/statefulset.yaml` | Secret, headless Service, StatefulSet (image: `pgvector/pgvector:pg15`) |
+
+The namespace `${NS_PGVECTOR}` is **not** created by this repo; create the OpenShift project / namespace before applying manifests.
 
 ## Configuration
 

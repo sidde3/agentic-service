@@ -30,9 +30,6 @@ fi
 COMPONENT_NAME=$(basename "$COMPONENT_DIR")
 section "Deploying $COMPONENT_NAME"
 
-# Ensure the services namespace exists
-oc get ns "$NS_SERVICES" &>/dev/null || oc new-project "$NS_SERVICES" --skip-config-write 2>/dev/null || oc create ns "$NS_SERVICES"
-
 apply_manifests "$COMPONENT_DIR/manifests"
 
 echo ""

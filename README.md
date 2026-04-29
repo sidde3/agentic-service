@@ -33,10 +33,14 @@ cp config/env.properties.example config/env.properties
 # Edit with your cluster domain, credentials, image tags
 # NS_PGVECTOR, NS_LLAMASTACK, NS_SERVICES should all be the same namespace
 
-# 2. Deploy everything
+# 2. Create that namespace on the cluster (not done by deploy scripts)
+set -a && source config/env.properties && set +a
+oc new-project "${NS_SERVICES}" --skip-config-write 2>/dev/null || true
+
+# 3. Deploy everything
 bash scripts/deploy-all.sh
 
-# 3. Run the chat UI
+# 4. Run the chat UI
 export ROUTER_URL="https://router-service-${NS_SERVICES}.${CLUSTER_DOMAIN}"
 streamlit run components/10-frontend/src/chat_app.py
 ```
