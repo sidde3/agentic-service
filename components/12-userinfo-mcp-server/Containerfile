@@ -23,7 +23,7 @@ USER 1001
 EXPOSE 8000
 
 ENV PYTHONUNBUFFERED=1
-ENV USERINFO_API_URL="http://userinfo-api.user-info.svc.cluster.local:8000"
+ENV USERINFO_API_URL="http://userinfo-api:8000"
 
 # Run FastAPI server
 CMD ["python", "server.py"]

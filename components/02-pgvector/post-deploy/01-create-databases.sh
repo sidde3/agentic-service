@@ -4,7 +4,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../.env.computed" 2>/dev/null || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NS="${NS_PGVECTOR:-pg-vector}"
+NS="${NS_PGVECTOR:-agentic-service}"
 JOB_NAME="db-init"
 
 echo "======================================"

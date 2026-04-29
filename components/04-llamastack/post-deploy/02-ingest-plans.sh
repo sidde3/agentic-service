@@ -4,7 +4,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../../.env.computed" 2>/dev/null || true
 
-LLAMASTACK_URL="${LLAMASTACK_URL:-https://llamastack-${NS_LLAMASTACK:-llamastack}.${CLUSTER_DOMAIN}}"
+LLAMASTACK_URL="${LLAMASTACK_URL:-https://llamastack-${NS_LLAMASTACK:-agentic-service}.${CLUSTER_DOMAIN}}"
 VECTOR_STORE_ID="${VECTOR_DB_ID:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${SCRIPT_DIR}/../data"

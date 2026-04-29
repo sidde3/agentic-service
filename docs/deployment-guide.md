@@ -40,6 +40,24 @@ cp config/env.properties.example config/env.properties
 bash scripts/deploy-all.sh
 ```
 
+## Clean reinstall (delete namespace)
+
+To wipe the application namespace and deploy again from a clean slate:
+
+1. **Delete the project** (replace with your `NS_SERVICES` from `config/env.properties`):
+
+   ```bash
+   oc delete project "${NS_SERVICES}" --wait=true
+   ```
+
+   If your cluster uses `oc delete ns` instead, use that. Wait until the namespace is fully gone before continuing.
+
+2. **Optional — stale local state:** The file `components/.env.computed` may still contain a `VECTOR_DB_ID` from the old cluster. Either delete it or let the next LlamaStack post-deploy overwrite it after `deploy-all.sh` runs. If you keep an old ID by mistake, vector/RAG calls will point at a non-existent store.
+
+3. **Models namespace:** This guide assumes models live in **`NS_MODELS`** (often a separate namespace). Deleting only **`NS_SERVICES`** does not remove InferenceServices; that is usually what you want so you do not have to re-import models.
+
+4. **Redeploy:** Run `bash scripts/deploy-all.sh` again. The script recreates **`NS_SERVICES`** if it is missing.
+
 ## Configuration
 
 Copy `config/env.properties.example` to `config/env.properties` and set:
@@ -49,10 +67,10 @@ Copy `config/env.properties.example` to `config/env.properties` and set:
 | Variable | Example | Description |
 |----------|---------|-------------|
 | `CLUSTER_DOMAIN` | `apps.ocp.example.com` | OpenShift apps domain |
-| `NS_PGVECTOR` | `pg-vector` | pgvector namespace |
-| `NS_MODELS` | `intent-classification-sidd` | Models namespace |
-| `NS_LLAMASTACK` | `llamastack` | LlamaStack namespace |
-| `NS_SERVICES` | `agentic-service` | Services namespace |
+| `NS_SERVICES` | `agentic-service` | Application namespace (all workloads) |
+| `NS_PGVECTOR` | `agentic-service` | Set same as NS_SERVICES (single namespace) |
+| `NS_LLAMASTACK` | `agentic-service` | Set same as NS_SERVICES (single namespace) |
+| `NS_MODELS` | `intent-classification-sidd` | Models namespace (separate, hard prereq) |
 | `PGVECTOR_USER` | `appuser` | pgvector superuser |
 | `PGVECTOR_PASSWORD` | — | pgvector superuser password |
 | `PG_USERINFO_USER` | `user_info` | userinfo DB role |
@@ -60,6 +78,8 @@ Copy `config/env.properties.example` to `config/env.properties` and set:
 | `PG_LLAMASTACK_USER` | `llamastack` | llamastack DB role |
 | `PG_LLAMASTACK_PASSWORD` | — | llamastack DB password |
 | `REDIS_PASSWORD` | — | Redis authentication |
+
+> **Single Namespace:** All application workloads (pgvector, LlamaStack, Redis, Agent, Router, MCP servers) run in a single namespace (`NS_SERVICES`). Set `NS_PGVECTOR` and `NS_LLAMASTACK` to the same value as `NS_SERVICES`. Only `NS_MODELS` is separate — AI models are a hard prerequisite deployed via the OpenShift AI dashboard.
 
 ### Image References
 
@@ -81,8 +101,8 @@ The `deploy-all.sh` script processes components in numeric order:
 ### Phase 1: Infrastructure
 
 1. **01-rhoai-prereqs** — Enables KServe, GenAI Studio, LlamaStack operator. Registers MCP servers in the dashboard.
-2. **02-pgvector** — Deploys PostgreSQL StatefulSet. Post-deploy: K8s Jobs create databases (`userinfo`, `llamastack`, `pgvector`) and seed sample data.
-3. **03-models** — Verifies that the three pre-deployed InferenceServices (Qwen, BERT, BGE-small) are `Ready`. Does not apply any manifests — reference manifests are in `components/03-models/reference/`.
+2. **02-pgvector** — Deploys PostgreSQL StatefulSet. Post-deploy: K8s Job **`db-init`** creates databases, roles, **userinfo** schema, and sample data in a single Job.
+3. **03-models** — Hard prerequisite. Models must be pre-deployed via OpenShift AI dashboard in `NS_MODELS`. Reference manifests are in `components/03-models/reference/`. The deploy script skips this step.
 
 ### Phase 2: AI Platform
 
@@ -105,7 +125,7 @@ The `deploy-all.sh` script processes components in numeric order:
 
 12. **10-frontend** — No cluster deployment. Run locally:
     ```bash
-    export ROUTER_URL=https://router-service-agentic-service.apps.your-cluster.com
+    export ROUTER_URL=https://router-service-${NS_SERVICES}.${CLUSTER_DOMAIN}
     streamlit run components/10-frontend/src/chat_app.py
     ```
 
@@ -118,17 +138,14 @@ After deployment, `deploy-all.sh` automatically runs:
 ## Manual Verification
 
 ```bash
-# Check all pods
+# Check all pods (single namespace for all app workloads)
 oc get pods -n ${NS_SERVICES}
-oc get pods -n ${NS_PGVECTOR}
-oc get pods -n ${NS_MODELS}
-oc get pods -n ${NS_LLAMASTACK}
 
-# Check InferenceServices
+# Check models (separate namespace)
 oc get inferenceservices -n ${NS_MODELS}
 
 # Check LlamaStack
-oc get llamastackdistribution -n ${NS_LLAMASTACK}
+oc get llamastackdistribution -n ${NS_SERVICES}
 
 # Test router health
 curl -sk https://router-service-${NS_SERVICES}.${CLUSTER_DOMAIN}/health

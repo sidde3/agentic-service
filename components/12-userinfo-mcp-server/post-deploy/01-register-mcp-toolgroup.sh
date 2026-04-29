@@ -3,7 +3,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../../.env.computed" 2>/dev/null || true
 
-LLAMASTACK_URL="${LLAMASTACK_URL:-https://llamastack-${NS_LLAMASTACK:-llamastack}.${CLUSTER_DOMAIN}}"
+LLAMASTACK_URL="${LLAMASTACK_URL:-https://llamastack-${NS_LLAMASTACK:-agentic-service}.${CLUSTER_DOMAIN}}"
 MCP_INTERNAL="http://userinfo-mcp-server.${NS_SERVICES:-agentic-service}.svc.cluster.local:8000"
 TOOLGROUP_ID="userinfo-mcp-server"
 

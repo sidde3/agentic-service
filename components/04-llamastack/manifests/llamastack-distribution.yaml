@@ -1,9 +1,62 @@
-apiVersion: llamastack.redhat.com/v1alpha1
+apiVersion: llamastack.io/v1alpha1
 kind: LlamaStackDistribution
 metadata:
   name: llamastack-custom-distribution
   namespace: ${NS_LLAMASTACK}
 spec:
+  network:
+    alloedFrom:
+      namespaces:
+        - "*"
+    exposeRoute: true
+  replicas: 1
   server:
-    userConfig:
-      configMapName: llamastack-user-config
+    containerSpec:
+      name: llama-stack
+      port: 8321
+      env:
+        - name: POSTGRES_HOST
+          value: ${POSTGRES_HOST}
+        - name: POSTGRES_PORT
+          value: "${POSTGRES_PORT}"
+        - name: POSTGRES_DB
+          value: ${POSTGRES_DB}
+        - name: POSTGRES_USER
+          value: ${POSTGRES_USER}
+        - name: POSTGRES_PASSWORD
+          value: ${POSTGRES_PASSWORD}
+        - name: INFERENCE_MODEL
+          value: ${LLS_INFERENCE_MODEL_ID}
+        - name: VLLM_URL
+          value: ${VLLM_URL}
+        - name: VLLM_TLS_VERIFY
+          value: "${VLLM_TLS_VERIFY}"
+        - name: EMBEDDING_MODEL
+          value: ${EMBEDDING_MODEL_NAME}
+        - name: EMBEDDING_PROVIDER_MODEL_ID
+          value: ${EMBEDDING_PROVIDER_MODEL_ID}
+        - name: VLLM_EMBEDDING_URL
+          value: ${VLLM_EMBEDDING_URL}
+        - name: VLLM_EMBEDDING_TLS_VERIFY
+          value: "${VLLM_EMBEDDING_TLS_VERIFY}"
+        - name: ENABLE_PGVECTOR
+          value: "${ENABLE_PGVECTOR}"
+        - name: PGVECTOR_HOST
+          value: ${PGVECTOR_HOST}
+        - name: PGVECTOR_PORT
+          value: "${PGVECTOR_PORT}"
+        - name: PGVECTOR_DB
+          value: ${PGVECTOR_DB}
+        - name: PGVECTOR_USER
+          value: ${PGVECTOR_USER}
+        - name: PGVECTOR_PASSWORD
+          value: ${PGVECTOR_PASSWORD}
+      resources:
+        requests:
+          cpu: ${LLAMASTACK_CPU_REQUEST}
+          memory: ${LLAMASTACK_MEMORY_REQUEST}
+        limits:
+          cpu: ${LLAMASTACK_CPU_LIMIT}
+          memory: ${LLAMASTACK_MEMORY_LIMIT}
+    distribution:
+      name: ${LLAMASTACK_DISTRIBUTION_NAME}

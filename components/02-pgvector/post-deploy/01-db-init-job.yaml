@@ -31,6 +31,186 @@ data:
     END $$;
     GRANT ALL PRIVILEGES ON DATABASE llamastack TO ${PG_LLAMASTACK_USER};
     ALTER DATABASE llamastack OWNER TO ${PG_LLAMASTACK_USER};
+
+  userinfo_seed.sql: |
+    -- Schema + sample data for userinfo (userinfo-api + router chat_sessions)
+    BEGIN;
+
+    CREATE TABLE IF NOT EXISTS users (
+        user_id SERIAL PRIMARY KEY,
+        external_id VARCHAR(50),
+        username VARCHAR(50) NOT NULL,
+        user_name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_users_external_id ON users(external_id);
+
+    CREATE TABLE IF NOT EXISTS plans (
+        plan_id SERIAL PRIMARY KEY,
+        plan_name VARCHAR(100) NOT NULL UNIQUE,
+        data_limit_gb INTEGER NOT NULL,
+        voice_limit_minutes INTEGER NOT NULL,
+        sms_limit INTEGER NOT NULL,
+        price NUMERIC(10,2) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS subscriptions (
+        subscription_id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(user_id),
+        mobile_number VARCHAR(20) NOT NULL UNIQUE,
+        account_number VARCHAR(50) NOT NULL,
+        status VARCHAR(20) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS user_plans (
+        id SERIAL PRIMARY KEY,
+        subscription_id INTEGER NOT NULL REFERENCES subscriptions(subscription_id),
+        plan_id INTEGER NOT NULL REFERENCES plans(plan_id),
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS usage_records (
+        usage_id SERIAL PRIMARY KEY,
+        subscription_id INTEGER NOT NULL REFERENCES subscriptions(subscription_id),
+        usage_date DATE NOT NULL,
+        data_used_gb NUMERIC(5,2) NOT NULL,
+        voice_used_minutes INTEGER NOT NULL,
+        sms_used INTEGER NOT NULL,
+        UNIQUE (subscription_id, usage_date)
+    );
+
+    CREATE TABLE IF NOT EXISTS billing (
+        bill_id SERIAL PRIMARY KEY,
+        subscription_id INTEGER NOT NULL REFERENCES subscriptions(subscription_id),
+        billing_cycle_start DATE NOT NULL,
+        billing_cycle_end DATE NOT NULL,
+        total_amount NUMERIC(10,2) NOT NULL,
+        paid BOOLEAN DEFAULT FALSE,
+        payment_date DATE
+    );
+
+    CREATE TABLE IF NOT EXISTS usage_insights (
+        id SERIAL PRIMARY KEY,
+        subscription_id INTEGER NOT NULL REFERENCES subscriptions(subscription_id),
+        month DATE NOT NULL,
+        usage_type VARCHAR(20) NOT NULL,
+        data_usage_percent NUMERIC(5,2) NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS chat_sessions (
+        username TEXT PRIMARY KEY,
+        history JSONB NOT NULL
+    );
+
+    TRUNCATE TABLE
+        usage_insights,
+        billing,
+        usage_records,
+        user_plans,
+        subscriptions,
+        users,
+        plans,
+        chat_sessions
+    RESTART IDENTITY CASCADE;
+
+    INSERT INTO plans (plan_name, data_limit_gb, voice_limit_minutes, sms_limit, price) VALUES
+        ('Lite 2GB', 2, 100, 50, 9.99),
+        ('Budget Saver 5GB', 5, 200, 100, 15.00),
+        ('Starter 10GB', 10, 300, 200, 22.00),
+        ('Standard 20GB', 20, 500, 300, 30.00),
+        ('Standard Plus 30GB', 30, 600, 350, 38.00),
+        ('Premium 50GB', 50, 1000, 500, 50.00),
+        ('Gaming 60GB', 60, 1200, 600, 58.00),
+        ('Business 100GB', 100, 2000, 1000, 99.00),
+        ('Family Unlimited', 999, 5000, 3000, 120.00),
+        ('Ultimate Unlimited', 999, 9999, 9999, 149.00);
+
+    INSERT INTO users (external_id, username, user_name, email) VALUES
+        ('ext_01', 'jessica.thompson', 'Jessica Thompson', 'jessica.thompson@example.com'),
+        ('ext_02', 'marcus.rivera', 'Marcus Rivera', 'marcus.rivera@example.com'),
+        ('ext_03', 'priya.nair', 'Priya Nair', 'priya.nair@example.com'),
+        ('ext_04', 'oliver.brown', 'Oliver Brown', 'oliver.brown@example.com'),
+        ('ext_05', 'yuki.tanaka', 'Yuki Tanaka', 'yuki.tanaka@example.com'),
+        ('ext_06', 'sofia.garcia', 'Sofia Garcia', 'sofia.garcia@example.com'),
+        ('ext_07', 'daniel.kim', 'Daniel Kim', 'daniel.kim@example.com'),
+        ('ext_08', 'emma.wilson', 'Emma Wilson', 'emma.wilson@example.com'),
+        ('ext_09', 'liam.okonkwo', 'Liam Okonkwo', 'liam.okonkwo@example.com'),
+        ('ext_10', 'anna.kowalski', 'Anna Kowalski', 'anna.kowalski@example.com');
+
+    INSERT INTO subscriptions (user_id, mobile_number, account_number, status) VALUES
+        (1, '0810000001', 'ACC-3001', 'active'),
+        (2, '0810000002', 'ACC-3002', 'active'),
+        (3, '0810000003', 'ACC-3003', 'active'),
+        (4, '0810000004', 'ACC-3004', 'active'),
+        (5, '0810000005', 'ACC-3005', 'active'),
+        (6, '0810000006', 'ACC-3006', 'active'),
+        (7, '0810000007', 'ACC-3007', 'active'),
+        (8, '0810000008', 'ACC-3008', 'active'),
+        (9, '0810000009', 'ACC-3009', 'active'),
+        (10, '0810000010', 'ACC-3010', 'active');
+
+    INSERT INTO user_plans (subscription_id, plan_id, start_date, end_date)
+    SELECT s.subscription_id,
+           ((s.subscription_id - 1) % 10) + 1 AS plan_id,
+           date_trunc('month', CURRENT_DATE)::date,
+           (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date
+    FROM subscriptions s
+    ORDER BY s.subscription_id;
+
+    INSERT INTO usage_records (subscription_id, usage_date, data_used_gb, voice_used_minutes, sms_used) VALUES
+        (1, CURRENT_DATE, 1.10, 12, 4),
+        (2, CURRENT_DATE, 2.05, 25, 8),
+        (3, CURRENT_DATE, 3.40, 40, 12),
+        (4, CURRENT_DATE, 4.80, 55, 15),
+        (5, CURRENT_DATE, 6.20, 70, 20),
+        (6, CURRENT_DATE, 8.50, 90, 25),
+        (7, CURRENT_DATE, 11.00, 110, 30),
+        (8, CURRENT_DATE, 15.20, 140, 35),
+        (9, CURRENT_DATE, 20.50, 180, 42),
+        (10, CURRENT_DATE, 28.00, 220, 50);
+
+    INSERT INTO billing (subscription_id, billing_cycle_start, billing_cycle_end, total_amount, paid, payment_date) VALUES
+        (1, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 30.00, TRUE, CURRENT_DATE - 3),
+        (2, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 22.00, TRUE, CURRENT_DATE - 4),
+        (3, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 38.00, FALSE, NULL),
+        (4, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 50.00, TRUE, CURRENT_DATE - 2),
+        (5, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 58.00, TRUE, CURRENT_DATE - 5),
+        (6, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 99.00, TRUE, CURRENT_DATE - 1),
+        (7, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 120.00, FALSE, NULL),
+        (8, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 149.00, TRUE, CURRENT_DATE - 6),
+        (9, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 15.00, TRUE, CURRENT_DATE - 7),
+        (10, date_trunc('month', CURRENT_DATE)::date, (date_trunc('month', CURRENT_DATE) + interval '1 month - 1 day')::date, 9.99, TRUE, CURRENT_DATE - 8);
+
+    INSERT INTO usage_insights (subscription_id, month, usage_type, data_usage_percent) VALUES
+        (1, date_trunc('month', CURRENT_DATE)::date, 'normal', 42.00),
+        (2, date_trunc('month', CURRENT_DATE)::date, 'under', 28.50),
+        (3, date_trunc('month', CURRENT_DATE)::date, 'normal', 55.20),
+        (4, date_trunc('month', CURRENT_DATE)::date, 'over', 102.00),
+        (5, date_trunc('month', CURRENT_DATE)::date, 'normal', 67.80),
+        (6, date_trunc('month', CURRENT_DATE)::date, 'under', 35.00),
+        (7, date_trunc('month', CURRENT_DATE)::date, 'over', 118.00),
+        (8, date_trunc('month', CURRENT_DATE)::date, 'normal', 88.40),
+        (9, date_trunc('month', CURRENT_DATE)::date, 'under', 22.10),
+        (10, date_trunc('month', CURRENT_DATE)::date, 'normal', 95.00);
+
+    INSERT INTO chat_sessions (username, history) VALUES
+        ('jessica.thompson', '[]'::jsonb),
+        ('marcus.rivera', '[]'::jsonb),
+        ('priya.nair', '[]'::jsonb),
+        ('oliver.brown', '[]'::jsonb),
+        ('yuki.tanaka', '[]'::jsonb),
+        ('sofia.garcia', '[]'::jsonb),
+        ('daniel.kim', '[]'::jsonb),
+        ('emma.wilson', '[]'::jsonb),
+        ('liam.okonkwo', '[]'::jsonb),
+        ('anna.kowalski', '[]'::jsonb);
+
+    COMMIT;
 ---
 apiVersion: batch/v1
 kind: Job
@@ -61,23 +241,41 @@ spec:
                 sleep 3
               done
               echo "pgvector is ready."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgvector-secret
+                  key: POSTGRES_PASSWORD
       containers:
         - name: init
           image: pgvector/pgvector:pg15
           command: ["sh", "-c"]
           args:
             - |
-              echo "Running database initialization..."
+              set -e
+              echo "Running database initialization (admin)..."
+              export PGPASSWORD="${PGVECTOR_PASSWORD}"
               psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
                    -U "${PGVECTOR_USER}" \
                    -d "${PGVECTOR_DB}" \
+                   -v ON_ERROR_STOP=1 \
                    -f /scripts/init.sql
               echo ""
+              echo "Creating userinfo tables and sample data (userinfo role)..."
+              export PGPASSWORD="${PG_USERINFO_PASSWORD}"
+              psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
+                   -U "${PG_USERINFO_USER}" \
+                   -d userinfo \
+                   -v ON_ERROR_STOP=1 \
+                   -f /scripts/userinfo_seed.sql
+              echo ""
               echo "Verifying databases..."
+              export PGPASSWORD="${PGVECTOR_PASSWORD}"
               psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
                    -U "${PGVECTOR_USER}" \
                    -d "${PGVECTOR_DB}" \
-                   -tAc "SELECT datname FROM pg_database WHERE datname IN ('userinfo','llamastack','pgvector') ORDER BY datname;"
+                   -tAc "SELECT datname FROM pg_database WHERE datname IN ('userinfo','llamastack','${PGVECTOR_DB}') ORDER BY datname;"
               echo ""
               echo "Verifying roles..."
               psql -h "pgvector.${NS_PGVECTOR}.svc.cluster.local" \
@@ -87,11 +285,21 @@ spec:
               echo ""
               echo "Database initialization complete."
           env:
-            - name: PGPASSWORD
+            - name: PGVECTOR_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: pgvector-secret
                   key: POSTGRES_PASSWORD
+            - name: PGVECTOR_USER
+              value: "${PGVECTOR_USER}"
+            - name: PGVECTOR_DB
+              value: "${PGVECTOR_DB}"
+            - name: PG_USERINFO_USER
+              value: "${PG_USERINFO_USER}"
+            - name: PG_USERINFO_PASSWORD
+              value: "${PG_USERINFO_PASSWORD}"
+            - name: PG_LLAMASTACK_USER
+              value: "${PG_LLAMASTACK_USER}"
           volumeMounts:
             - name: scripts
               mountPath: /scripts

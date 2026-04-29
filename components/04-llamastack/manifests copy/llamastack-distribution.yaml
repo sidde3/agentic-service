@@ -1,0 +1,11 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastack-custom-distribution
+  namespace: ${NS_LLAMASTACK}
+spec:
+  server:
+    distribution:
+      name: rh-dev
+    userConfig:
+      configMapName: llamastack-user-config

@@ -9,7 +9,7 @@ A user messages through a **Streamlit Chat UI**. The **Router** classifies the m
 | # | Component | Description | Docs |
 |---|-----------|-------------|------|
 | 01 | RHOAI Prerequisites | KServe, GenAI Studio, LlamaStack operator, MCP ConfigMap | [docs](docs/components/01-rhoai-prereqs.md) |
-| 02 | pgvector | PostgreSQL + pgvector: 3 databases, K8s Jobs for init/seed | [docs](docs/components/02-pgvector.md) |
+| 02 | pgvector | PostgreSQL + pgvector: single Job `db-init` (DBs, roles, userinfo tables + seed) | [docs](docs/components/02-pgvector.md) |
 | 03 | Models | Qwen 2.5 7B (GPU), BERT (CPU), BGE-small (CPU) | [docs](docs/components/03-models.md) |
 | 04 | LlamaStack | Inference, agents, vector I/O, MCP tool runtime | [docs](docs/components/04-llamastack.md) |
 | 05 | Redis | Session store for router | [docs](docs/components/05-redis.md) |
@@ -21,18 +21,23 @@ A user messages through a **Streamlit Chat UI**. The **Router** classifies the m
 | 11 | UserInfo API | REST API over userinfo database | [docs](docs/components/11-userinfo-api.md) |
 | 12 | UserInfo MCP Server | MCP proxy to UserInfo API | [docs](docs/components/12-userinfo-mcp-server.md) |
 
+## Deployment Model
+
+All application workloads (pgvector, LlamaStack, Redis, Agent, Router, MCP servers) deploy into a **single namespace**. Only AI models live in a separate namespace, pre-deployed via the OpenShift AI dashboard.
+
 ## Quick Start
 
 ```bash
 # 1. Configure
 cp config/env.properties.example config/env.properties
 # Edit with your cluster domain, credentials, image tags
+# NS_PGVECTOR, NS_LLAMASTACK, NS_SERVICES should all be the same namespace
 
 # 2. Deploy everything
 bash scripts/deploy-all.sh
 
 # 3. Run the chat UI
-export ROUTER_URL="https://router-service-agentic-service.apps.<your-cluster>"
+export ROUTER_URL="https://router-service-${NS_SERVICES}.${CLUSTER_DOMAIN}"
 streamlit run components/10-frontend/src/chat_app.py
 ```
 

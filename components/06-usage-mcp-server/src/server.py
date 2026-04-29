@@ -19,7 +19,7 @@ from datetime import date, timedelta
 
 import asyncpg
 
-DB_HOST = os.getenv("DB_HOST", "pgvector.pg-vector.svc.cluster.local")
+DB_HOST = os.getenv("DB_HOST", "pgvector")
 DB_PORT = int(os.getenv("DB_PORT", "5432"))
 DB_NAME = os.getenv("DB_NAME", "userinfo")
 DB_USER = os.getenv("DB_USER", "user_info")

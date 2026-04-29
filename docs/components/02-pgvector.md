@@ -4,7 +4,7 @@ Single-node PostgreSQL instance with the `pgvector` extension, hosting all appli
 
 ## What It Does
 
-Deploys a PostgreSQL StatefulSet with a 10Gi PVC. Post-deploy Kubernetes Jobs initialize databases, create roles, enable the `vector` extension, and seed sample data.
+Deploys a PostgreSQL StatefulSet with a 10Gi PVC. Post-deploy Kubernetes Job **`db-init`** does all database setup in one run: extension, databases, roles, **userinfo** tables, and sample data with **at least 10 rows per table** (embedded SQL in the Job’s ConfigMap).
 
 ## Databases
 
@@ -16,27 +16,16 @@ Deploys a PostgreSQL StatefulSet with a 10Gi PVC. Post-deploy Kubernetes Jobs in
 
 ## Source Files
 
-### `post-deploy/populate_postgres_userdata.py`
-Python script that creates the `userinfo` schema and seeds it with sample data:
-- **`create_tables()`** — DDL for 8 tables: `users`, `subscriptions`, `plans`, `user_plans`, `usage_records`, `billing`, `usage_insights`, `chat_sessions` (simplified: `username` PK + `history` JSONB)
-- **`seed_plans()`** — Inserts standard mobile plans (Basic, Standard, Premium, Unlimited)
-- **`seed_from_json()`** — Parses `sample_usage.json` and populates users, subscriptions, usage records, billing, and insights
-- **`verify()`** — Counts rows in each table
-
 ### `post-deploy/01-db-init-job.yaml`
-Kubernetes Job `db-init` with embedded SQL ConfigMap:
-- Creates databases `userinfo` and `llamastack`
-- Creates roles with passwords from env vars
-- Grants privileges
-- Enables `vector` extension on the default DB
+Kubernetes Job `db-init` with ConfigMap `db-init-sql`:
+- **`init.sql`** (admin): creates databases `userinfo` and `llamastack`, roles, grants, owner; enables `vector` on the default DB.
+- **`userinfo_seed.sql`** (same Job, second `psql` as `PG_USERINFO_USER`): eight tables, `TRUNCATE … CASCADE`, then **10 rows** seeded per table (including `jessica.thompson@example.com` and nine other demo users).
 
-### `post-deploy/02-db-seed-job.yaml`
-Kubernetes Job `db-seed-userinfo`:
-- Runs `populate_postgres_userdata.py` in a `python:3.12-slim` container
-- Mounts the script and `sample_usage.json` via ConfigMaps
+### `post-deploy/populate_postgres_userdata.py` (optional / legacy)
+Not used by the cluster Job anymore. You can still run it locally against `userinfo` if you want the richer **`data/sample_usage.json`** seed instead of the minimal SQL seed.
 
 ### `data/sample_usage.json`
-Rich JSON profiles with user details, plans, usage history, and billing data.
+Rich JSON profiles used by `populate_postgres_userdata.py` for local or custom seeding.
 
 ## Manifests
 

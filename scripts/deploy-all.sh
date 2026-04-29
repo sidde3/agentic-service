@@ -1,6 +1,11 @@
 #!/bin/bash
-# Master deployment script — deploys all components in order.
+# Master deployment script — deploys all components in dependency-aware order.
 # Usage: bash scripts/deploy-all.sh [--skip-post-deploy]
+#
+# Sequence (numeric sort is not used). This script only deploys:
+#   02 PGVector (+ DB Jobs) → 04 LlamaStack (+ vector ingestion)
+#   → 11 userinfo-api → 12 userinfo-mcp (+ MCP registration) → 08 agent
+# Cluster operators / RHOAI prereqs (01), models, router, redis, other MCPs, frontend, etc. are out of scope here.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,64 +14,65 @@ load_config
 
 SKIP_POST_DEPLOY="${1:-}"
 
+# Explicit order — do not rely on lexical directory sort.
+DEPLOY_COMPONENT_ORDER=(
+    02-pgvector
+    04-llamastack
+    11-userinfo-api
+    12-userinfo-mcp-server
+    08-agent
+)
+
 echo ""
 echo "============================================================"
 echo "  Agentic Use Case — Full Deployment"
 echo "============================================================"
 echo "  Cluster:            $CLUSTER_DOMAIN"
-echo "  Services NS:        $NS_SERVICES"
+echo "  Namespace:          $NS_SERVICES"
+echo "  Models NS:          $NS_MODELS (hard prerequisite)"
 echo "  Vector Ingestion:   ${ENABLE_VECTOR_INGESTION:-true}"
 echo "============================================================"
 
-# ── Create the services namespace first (needed by 05-10) ───────────────
+# ── Create the application namespace ─────────────────────────────────────
+# All workloads (pgvector, llamastack, services) share a single namespace.
+# Only models live in NS_MODELS (deployed separately via OpenShift AI).
 oc get ns "$NS_SERVICES" &>/dev/null || oc new-project "$NS_SERVICES" --skip-config-write 2>/dev/null || oc create ns "$NS_SERVICES"
 
-# ── Deploy each component in order ─────────────────────────────────────
 COMPONENTS_DIR="$REPO_ROOT/components"
+local_computed="$REPO_ROOT/components/.env.computed"
 
-for component_dir in "$COMPONENTS_DIR"/[0-9][0-9]-*/; do
-    component_name=$(basename "$component_dir")
-    section "Deploying $component_name"
-
-    # 01-rhoai-prereqs: run setup script instead of manifests
-    if [[ "$component_name" == "01-rhoai-prereqs" ]]; then
-        if [[ -f "$component_dir/setup/enable-rhoai-features.sh" ]]; then
-            echo "  Running RHOAI prerequisite setup ..."
-            bash "$component_dir/setup/enable-rhoai-features.sh"
-        fi
-        apply_manifests "$component_dir/manifests"
-        echo "  01-rhoai-prereqs READY"
+for component_name in "${DEPLOY_COMPONENT_ORDER[@]}"; do
+    component_dir="${COMPONENTS_DIR}/${component_name}"
+    if [[ ! -d "$component_dir" ]]; then
+        echo "WARNING: missing component directory $component_dir — skipping"
         continue
     fi
 
-    # 03-models: hard prerequisite — must be pre-deployed via OpenShift AI dashboard.
-    # Manifests in components/03-models/reference/ are for documentation only.
-    # Model names/URLs must be configured in env.properties before running this script.
-    if [[ "$component_name" == "03-models" ]]; then
-        echo "  Models are a hard prerequisite (see components/03-models/reference/)."
-        echo "  Ensure all models are deployed and configured in env.properties."
-        echo "  03-models SKIPPED (reference only)"
-        continue
+    section "Deploying $component_name"
+
+    # Agent manifest needs VECTOR_DB_ID from LlamaStack post-deploy.
+    if [[ "$component_name" == "08-agent" && -f "$local_computed" ]]; then
+        echo "  Re-sourcing .env.computed (VECTOR_DB_ID) before agent manifests ..."
+        set -a
+        # shellcheck source=/dev/null
+        source "$local_computed"
+        set +a
     fi
 
     apply_manifests "$component_dir/manifests"
 
     # Wait for known deployments/statefulsets
     case "$component_name" in
-        02-pgvector)   wait_for_statefulset "pgvector" "$NS_PGVECTOR" ;;
+        02-pgvector)            wait_for_statefulset "pgvector" "$NS_PGVECTOR" ;;
         04-llamastack)
             echo "  Waiting for LlamaStackDistribution to become Ready ..."
-            for i in $(seq 1 60); do
+            for _ in $(seq 1 60); do
                 phase=$(oc get llamastackdistribution -n "$NS_LLAMASTACK" -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "")
                 [[ "$phase" == "Ready" ]] && break
                 sleep 5
             done
             ;;
-        05-redis)              wait_for_deployment "redis" "$NS_SERVICES" ;;
-        06-usage-mcp-server)   wait_for_deployment "usage-mcp-server-v2" "$NS_SERVICES" ;;
-        07-helloworld-mcp)     wait_for_deployment "helloworld-mcp-server" "$NS_SERVICES" ;;
-        08-agent)              wait_for_deployment "agent-service" "$NS_SERVICES" ;;
-        09-router)             wait_for_deployment "router-service" "$NS_SERVICES" ;;
+        08-agent)               wait_for_deployment "agent-service" "$NS_SERVICES" ;;
         11-userinfo-api)       wait_for_deployment "userinfo-api" "$NS_SERVICES" ;;
         12-userinfo-mcp-server) wait_for_deployment "userinfo-mcp-server" "$NS_SERVICES" ;;
     esac
@@ -84,13 +90,14 @@ for component_dir in "$COMPONENTS_DIR"/[0-9][0-9]-*/; do
         fi
     fi
 
-    # After LlamaStack post-deploy, re-source .env.computed to pick up
-    # VECTOR_DB_ID (dynamically set by 01-create-vector-store.sh)
+    # After LlamaStack post-deploy, re-source .env.computed to pick up VECTOR_DB_ID
     if [[ "$component_name" == "04-llamastack" ]]; then
-        local_computed="$REPO_ROOT/components/.env.computed"
         if [[ -f "$local_computed" ]]; then
             echo "  Re-sourcing .env.computed (VECTOR_DB_ID) ..."
-            set -a; source "$local_computed"; set +a
+            set -a
+            # shellcheck source=/dev/null
+            source "$local_computed"
+            set +a
         fi
     fi
 
@@ -118,21 +125,33 @@ smoke_check() {
 
 echo ""
 echo "  Health checks:"
-smoke_check "Router /health"        "$ROUTER_ROUTE_URL/health"
 smoke_check "Agent /health"         "$AGENT_ROUTE_URL/health"
 smoke_check "Llama Stack /models"   "$LLAMASTACK_URL/v1/models"
 
 echo ""
-echo "  Chat test (usage check):"
-printf "  %-30s " "POST /chat"
-CHAT_RESPONSE=$(curl -sk -X POST "$ROUTER_ROUTE_URL/chat" \
+echo "  Agent workflow (RAG + userinfo MCP via POST /recommend):"
+printf "  %-30s " "POST /recommend"
+RECOMMEND_RESPONSE=$(curl -sk --max-time 300 -X POST "${AGENT_ROUTE_URL}/recommend" \
     -H "Content-Type: application/json" \
-    -d '{"user_id":"jessica.thompson@example.com","message":"Check my current data usage","predefined_intent":"MOBILE_USAGE_CHECK_DATA_CURRENT"}' 2>/dev/null || echo "")
-if echo "$CHAT_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d.get('reply')" 2>/dev/null; then
-    echo "OK (got reply)"
+    -d '{"user_id":"jessica.thompson@example.com","query":"Compare my current plan with alternatives. Use my account and usage, search the plan catalog, then recommend.","intent":"MOBILE_USAGE_COMPARE_DATA_PLAN"}' \
+    2>/dev/null || echo "")
+if echo "$RECOMMEND_RESPONSE" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert d.get('status') == 'success' and not d.get('has_errors'), d
+assert (d.get('reply') or '').strip(), 'empty reply'
+tools = list(d.get('tool_call_summary') or [])
+has_rag = 'knowledge_search' in tools
+has_userinfo_mcp = any(
+    t.startswith('get_') or 'user_info' in t.lower() or 'subscription' in t.lower()
+    for t in tools
+)
+assert has_rag and has_userinfo_mcp, f'expected vector RAG + userinfo MCP tools, got {tools!r}'
+" 2>/dev/null; then
+    echo "OK (reply + tools)"
     SMOKE_PASS=$((SMOKE_PASS + 1))
 else
-    echo "FAIL (no reply)"
+    echo "FAIL (see agent logs / model availability)"
     SMOKE_FAIL=$((SMOKE_FAIL + 1))
 fi
 
@@ -147,10 +166,8 @@ fi
 # ── Summary ─────────────────────────────────────────────────────────────
 section "Deployment Complete"
 echo ""
-echo "  Router:      $ROUTER_ROUTE_URL"
 echo "  Agent:       $AGENT_ROUTE_URL"
 echo "  Llama Stack: $LLAMASTACK_URL"
-echo "  Frontend:    Run locally: streamlit run components/10-frontend/src/chat_app.py"
 echo ""
 echo "  Full test suite:  bash tests/test-all.sh"
 echo ""

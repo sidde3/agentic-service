@@ -1,0 +1,332 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  creationTimestamp: '2026-04-29T09:19:44Z'
+  generation: 2
+  managedFields:
+    - apiVersion: llamastack.io/v1alpha1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:replicas': {}
+          'f:server':
+            .: {}
+            'f:containerSpec':
+              .: {}
+              'f:name': {}
+              'f:port': {}
+              'f:resources':
+                .: {}
+                'f:limits':
+                  .: {}
+                  'f:cpu': {}
+                  'f:memory': {}
+                'f:requests':
+                  .: {}
+                  'f:cpu': {}
+                  'f:memory': {}
+            'f:distribution':
+              .: {}
+              'f:name': {}
+      manager: Mozilla
+      operation: Update
+      time: '2026-04-29T09:19:44Z'
+    - apiVersion: llamastack.io/v1alpha1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          'f:server':
+            'f:containerSpec':
+              'f:env': {}
+      manager: kubectl-edit
+      operation: Update
+      time: '2026-04-29T09:22:22Z'
+    - apiVersion: llamastack.io/v1alpha1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:status':
+          .: {}
+          'f:availableReplicas': {}
+          'f:conditions': {}
+          'f:distributionConfig':
+            .: {}
+            'f:activeDistribution': {}
+            'f:availableDistributions':
+              .: {}
+              'f:rh-dev': {}
+            'f:providers': {}
+          'f:phase': {}
+          'f:serviceURL': {}
+          'f:version':
+            .: {}
+            'f:lastUpdated': {}
+            'f:llamaStackServerVersion': {}
+            'f:operatorVersion': {}
+      manager: manager
+      operation: Update
+      subresource: status
+      time: '2026-04-29T09:22:46Z'
+  name: lsd-llama-pgvector-remote
+  namespace: testing-agentic-usecase
+  resourceVersion: '5548718'
+  uid: 11f2739b-e6ea-474e-ac4d-01761183cefa
+spec:
+  replicas: 1
+  server:
+    containerSpec:
+      env:
+        - name: POSTGRES_HOST
+          value: pgvector.testing-agentic-usecase.svc.cluster.local
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_DB
+          value: llamastack
+        - name: POSTGRES_USER
+          value: llamastack
+        - name: POSTGRES_PASSWORD
+          value: secret
+        - name: INFERENCE_MODEL
+          value: qwen25-7b-instruct
+        - name: VLLM_URL
+          value: 'https://qwen25-7b-instruct-intent-classification-sidd.apps.cluster-gtz8f.gtz8f.sandbox1999.opentlc.com/v1'
+        - name: VLLM_TLS_VERIFY
+          value: 'false'
+        - name: EMBEDDING_MODEL
+          value: bge-small-en-v15
+        - name: EMBEDDING_PROVIDER_MODEL_ID
+          value: bge-small-en-v15
+        - name: VLLM_EMBEDDING_URL
+          value: 'https://bge-small-en-v15-intent-classification-sidd.apps.cluster-gtz8f.gtz8f.sandbox1999.opentlc.com/v1'
+        - name: VLLM_EMBEDDING_TLS_VERIFY
+          value: 'false'
+        - name: ENABLE_PGVECTOR
+          value: 'true'
+        - name: PGVECTOR_HOST
+          value: pgvector.testing-agentic-usecase.svc.cluster.local
+        - name: PGVECTOR_PORT
+          value: '5432'
+        - name: PGVECTOR_DB
+          value: pgvector
+        - name: PGVECTOR_USER
+          value: appuser
+        - name: PGVECTOR_PASSWORD
+          value: apppassword
+      name: llama-stack
+      port: 8321
+      resources:
+        limits:
+          cpu: 4
+          memory: 12Gi
+        requests:
+          cpu: 250m
+          memory: 500Mi
+    distribution:
+      name: rh-dev
+status:
+  availableReplicas: 1
+  conditions:
+    - lastTransitionTime: '2026-04-29T09:22:46Z'
+      message: Deployment is ready
+      reason: DeploymentReady
+      status: 'True'
+      type: DeploymentReady
+    - lastTransitionTime: '2026-04-29T09:22:46Z'
+      message: Service is ready
+      reason: ServiceReady
+      status: 'True'
+      type: ServiceReady
+    - lastTransitionTime: '2026-04-29T09:22:46Z'
+      message: Health check passed
+      reason: HealthCheckPassed
+      status: 'True'
+      type: HealthCheck
+  distributionConfig:
+    activeDistribution: rh-dev
+    availableDistributions:
+      rh-dev: 'registry.redhat.io/rhoai/odh-llama-stack-core-rhel9@sha256:5e383f3194c0b0c9f77a7d2450bb0d9b2c94d935e8396da4d54cf0e3369d1d13'
+    providers:
+      - api: inference
+        config:
+          api_token: '********'
+          base_url: 'https://qwen25-7b-instruct-intent-classification-sidd.apps.cluster-gtz8f.gtz8f.sandbox1999.opentlc.com/v1'
+          max_tokens: 4096
+          tls_verify: false
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: vllm-inference
+        provider_type: 'remote::vllm'
+      - api: inference
+        config:
+          api_token: '********'
+          base_url: 'https://bge-small-en-v15-intent-classification-sidd.apps.cluster-gtz8f.gtz8f.sandbox1999.opentlc.com/v1'
+          max_tokens: 4096
+          tls_verify: false
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: vllm-embedding
+        provider_type: 'remote::vllm'
+      - api: vector_io
+        config:
+          db_path: /opt/app-root/src/.llama/distributions/rh/milvus.db
+          persistence:
+            backend: kv_default
+            namespace: 'vector_io::milvus'
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: milvus
+        provider_type: 'inline::milvus'
+      - api: vector_io
+        config:
+          db: pgvector
+          host: pgvector.testing-agentic-usecase.svc.cluster.local
+          password: '********'
+          persistence:
+            backend: kv_default
+            namespace: 'vector_io::pgvector'
+          port: 5432
+          user: appuser
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: pgvector
+        provider_type: 'remote::pgvector'
+      - api: safety
+        config:
+          orchestrator_url: null
+          shields: {}
+          ssl_cert_path: null
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: trustyai_fms
+        provider_type: 'remote::trustyai_fms'
+      - api: agents
+        config:
+          persistence:
+            agent_state:
+              backend: kv_default
+              namespace: 'agents::meta_reference'
+            responses:
+              backend: sql_default
+              max_write_queue_size: 10000
+              num_writers: 4
+              table_name: agents_responses
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: meta-reference
+        provider_type: 'inline::meta-reference'
+      - api: eval
+        config:
+          base_url: 'https://qwen25-7b-instruct-intent-classification-sidd.apps.cluster-gtz8f.gtz8f.sandbox1999.opentlc.com/v1'
+          use_k8s: true
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: trustyai_lmeval
+        provider_type: 'remote::trustyai_lmeval'
+      - api: datasetio
+        config:
+          kvstore:
+            backend: kv_default
+            namespace: 'datasetio::huggingface'
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: huggingface
+        provider_type: 'remote::huggingface'
+      - api: datasetio
+        config:
+          kvstore:
+            backend: kv_default
+            namespace: 'datasetio::localfs'
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: localfs
+        provider_type: 'inline::localfs'
+      - api: scoring
+        config: {}
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: basic
+        provider_type: 'inline::basic'
+      - api: scoring
+        config: {}
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: llm-as-judge
+        provider_type: 'inline::llm-as-judge'
+      - api: scoring
+        config:
+          openai_api_key: '********'
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: braintrust
+        provider_type: 'inline::braintrust'
+      - api: tool_runtime
+        config:
+          api_key: '********'
+          max_results: 3
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: brave-search
+        provider_type: 'remote::brave-search'
+      - api: tool_runtime
+        config:
+          api_key: '********'
+          max_results: 3
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: tavily-search
+        provider_type: 'remote::tavily-search'
+      - api: tool_runtime
+        config: {}
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: rag-runtime
+        provider_type: 'inline::rag-runtime'
+      - api: tool_runtime
+        config: {}
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: model-context-protocol
+        provider_type: 'remote::model-context-protocol'
+      - api: files
+        config:
+          metadata_store:
+            backend: sql_default
+            table_name: files_metadata
+          storage_dir: /opt/app-root/src/.llama/distributions/rh/files
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: meta-reference-files
+        provider_type: 'inline::localfs'
+      - api: batches
+        config:
+          kvstore:
+            backend: kv_default
+            namespace: batches
+        health:
+          message: Provider does not implement health check
+          status: Not Implemented
+        provider_id: reference
+        provider_type: 'inline::reference'
+  phase: Ready
+  serviceURL: 'http://lsd-llama-pgvector-remote-service.testing-agentic-usecase.svc.cluster.local:8321'
+  version:
+    lastUpdated: '2026-04-29T09:22:46Z'
+    llamaStackServerVersion: 0.4.2.1+rhai0
+    operatorVersion: '"0.4.0"'

@@ -17,7 +17,7 @@ from sqlalchemy.pool import NullPool
 # Database URL from environment
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://appuser:password@pgsql.postgres.svc.cluster.local:5432/userdb"
+    "postgresql+asyncpg://user_info:secret@pgvector:5432/userinfo"
 )
 
 # Create async engine

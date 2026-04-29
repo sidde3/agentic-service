@@ -15,10 +15,7 @@ import uuid
 import httpx
 import streamlit as st
 
-ROUTER_URL = os.getenv(
-    "ROUTER_URL",
-    "https://router-service-agentic-service.apps.ocp.bhqd8.sandbox1981.opentlc.com",
-)
+ROUTER_URL = os.getenv("ROUTER_URL", "http://localhost:8080")
 DEFAULT_USER_EMAIL = os.getenv("DEFAULT_USER_EMAIL", "jessica.thompson@example.com")
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "120"))
 

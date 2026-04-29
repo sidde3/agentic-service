@@ -7,7 +7,7 @@ This document describes the end-to-end architecture of the **AI Agentic Use Case
 ```mermaid
 flowchart TB
   subgraph cluster [OpenShift Cluster]
-    subgraph pgNS [pgvector namespace]
+    subgraph ns [Application Namespace — agentic-service]
       PG[(pgvector StatefulSet)]
       DB1[llamastack DB]
       DB2[userinfo DB]
@@ -16,24 +16,8 @@ flowchart TB
       PG --- DB2
       PG --- DB3
       Job1[K8s Job: db-init]
-      Job2[K8s Job: db-seed]
       Job1 --> PG
-      Job2 --> PG
-    end
-    subgraph models [models namespace]
-      BERT[finetuned-phayathai-bert]
-      Qwen[qwen25-7b-instruct AWQ]
-      BGE[bge-small-en-v15 — embedding]
-      Reranker[qwen3-reranker-06b]
-    end
-    subgraph ls [llamastack namespace]
       LS[LlamaStackDistribution]
-      LS --> Qwen
-      LS --> BGE
-      LS --> DB1
-      LS --> DB3
-    end
-    subgraph svc [agentic-service namespace]
       Redis[(Redis)]
       Router[09-router]
       Agent[08-agent]
@@ -42,6 +26,16 @@ flowchart TB
       UserInfoAPI[11-userinfo-api]
       UserInfoMCP[12-userinfo-mcp-server]
     end
+    subgraph models [Models Namespace — intent-classification-sidd]
+      BERT[finetuned-phayathai-bert]
+      Qwen[qwen25-7b-instruct AWQ]
+      BGE[bge-small-en-v15 — embedding]
+      Reranker[qwen3-reranker-06b]
+    end
+    LS --> Qwen
+    LS --> BGE
+    LS --> DB1
+    LS --> DB3
     Client[10-frontend Chat UI] --> Router
     Router --> BERT
     Router -->|MOBILE_USAGE_*| Agent
@@ -115,13 +109,15 @@ The **LlamaStackDistribution** provides a unified API layer:
 
 ## Namespaces
 
+All application workloads run in a **single namespace**. Only AI models live in a separate namespace.
+
 | Namespace | Components |
 |-----------|-----------|
-| `${NS_PGVECTOR}` (e.g. `pg-vector`) | PostgreSQL + pgvector StatefulSet, init/seed Jobs |
-| `${NS_MODELS}` (e.g. `intent-classification-sidd`) | KServe InferenceServices (Qwen, BERT, BGE) |
-| `${NS_LLAMASTACK}` (e.g. `llamastack`) | LlamaStackDistribution |
-| `${NS_SERVICES}` (e.g. `agentic-service`) | Redis, Router, Agent, MCP servers, UserInfo API/MCP |
-| `redhat-ods-applications` | RHOAI dashboard, GenAI Studio config |
+| `${NS_SERVICES}` (e.g. `agentic-service`) | PostgreSQL, LlamaStack, Redis, Router, Agent, MCP servers, UserInfo API/MCP |
+| `${NS_MODELS}` (e.g. `intent-classification-sidd`) | KServe InferenceServices (Qwen, BERT, BGE, Reranker) — hard prerequisite |
+| `redhat-ods-applications` | RHOAI dashboard, GenAI Studio config (optional) |
+
+> `NS_PGVECTOR` and `NS_LLAMASTACK` should be set to the same value as `NS_SERVICES` in `config/env.properties`.
 
 ## GenAI Studio Integration
 

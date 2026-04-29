@@ -10,7 +10,7 @@ from datetime import date as dt
 from typing import Optional
 import httpx
 
-USERINFO_API_URL = os.getenv("USERINFO_API_URL", "http://userinfo-api.user-info.svc.cluster.local:8000")
+USERINFO_API_URL = os.getenv("USERINFO_API_URL", "http://userinfo-api:8000")
 
 
 async def _api(endpoint: str, params: dict = None) -> dict:

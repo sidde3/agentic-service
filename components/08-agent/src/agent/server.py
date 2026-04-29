@@ -42,7 +42,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-LLAMA_STACK = os.getenv("LLAMA_STACK_ENDPOINT", "http://llamastack:5000")
+LLAMA_STACK = os.getenv("LLAMA_STACK_ENDPOINT", "http://llamastack-custom-distribution:8321")
 MODEL = os.getenv("INFERENCE_MODEL", "vllm-inference/qwen25-7b-instruct")
 MCP_TOOLGROUP = os.getenv("MCP_TOOLGROUP", "userinfo-mcp-server")
 VECTOR_DB_ID = os.getenv("VECTOR_DB_ID", "")
