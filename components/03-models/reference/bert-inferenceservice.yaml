@@ -1,15 +1,52 @@
+# InferenceService: finetuned-phayathai-bert (intent classification)
+# Source: intent-classification-sidd namespace
+# Model: S3 bucket (finetune-phayathai-bert connection, path: merged-models/encoder)
+# Key args: --runner=pooling --convert=classify (runs as a classifier)
+#           --hf-overrides to force RobertaForSequenceClassification architecture
+# Runs on CPU — no GPU required
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
-  name: ${BERT_MODEL_NAME}
-  namespace: ${NS_MODELS}
   annotations:
+    opendatahub.io/connection-path: merged-models/encoder
+    opendatahub.io/connections: finetune-phayathai-bert
+    opendatahub.io/hardware-profile-name: default-profile
+    opendatahub.io/hardware-profile-namespace: redhat-ods-applications
+    opendatahub.io/model-type: generative
+    openshift.io/description: finetuned-phayathai-bert
+    openshift.io/display-name: finetuned-phayathai-bert
+    security.opendatahub.io/enable-auth: "false"
     serving.kserve.io/deploymentMode: RawDeployment
   labels:
+    networking.kserve.io/visibility: exposed
     opendatahub.io/dashboard: "true"
+  name: finetuned-phayathai-bert
+  namespace: ${NS_MODELS}
 spec:
   predictor:
+    automountServiceAccountToken: false
+    deploymentStrategy:
+      type: Recreate
+    maxReplicas: 1
+    minReplicas: 1
     model:
+      args:
+      - --runner=pooling
+      - --convert=classify
+      - --trust-remote-code
+      - --hf-overrides={"architectures":["RobertaForSequenceClassification"]}
       modelFormat:
-        name: custom
-      runtime: bert-intent-runtime
+        name: vLLM
+      name: ""
+      resources:
+        limits:
+          cpu: "2"
+          memory: 4Gi
+        requests:
+          cpu: "2"
+          memory: 4Gi
+      runtime: finetuned-phayathai-bert
+      storage:
+        key: finetune-phayathai-bert
+        path: merged-models/encoder
+    serviceAccountName: finetune-phayathai-bert-sa

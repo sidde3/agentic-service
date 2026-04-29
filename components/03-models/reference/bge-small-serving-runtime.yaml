@@ -1,58 +1,41 @@
+# ServingRuntime: bge-small-en-v1.5 (CPU — vLLM CPU)
+# Source: intent-classification-sidd namespace
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
 metadata:
-  name: vllm-bge-small-runtime
-  namespace: ${NS_MODELS}
   annotations:
     opendatahub.io/apiProtocol: REST
-    opendatahub.io/template-display-name: vLLM CPU Runtime (BGE-small embedding)
+    opendatahub.io/runtime-version: v0.9.1.0
+    opendatahub.io/template-display-name: CvLLM CPU (amd) ServingRuntime for KServe
+    opendatahub.io/template-name: template-5d71ra
+    openshift.io/display-name: CvLLM CPU (amd) ServingRuntime for KServe
   labels:
     opendatahub.io/dashboard: "true"
+  name: bge-small-en-v15
+  namespace: ${NS_MODELS}
 spec:
   annotations:
-    prometheus.io/port: "8080"
+    opendatahub.io/kserve-runtime: vllm
     prometheus.io/path: /metrics
+    prometheus.io/port: "8080"
+  containers:
+  - args:
+    - --port=8080
+    - --model=/mnt/models
+    - --served-model-name={{.Name}}
+    command:
+    - python
+    - -m
+    - vllm.entrypoints.openai.api_server
+    env:
+    - name: HF_HOME
+      value: /tmp/hf_home
+    image: registry.redhat.io/rhaii-early-access/vllm-cpu-rhel9:3.4.0-ea.2-1774640877
+    name: kserve-container
+    ports:
+    - containerPort: 8080
+      protocol: TCP
   multiModel: false
   supportedModelFormats:
-    - autoSelect: true
-      name: vLLM
-  containers:
-    - name: kserve-container
-      image: quay.io/modh/vllm@sha256:5d08cf5da0c7e5cdfbcbecb2f68db9e82bfe38d1073251e2af6a13fae72638b0
-      command:
-        - python
-        - -m
-        - vllm.entrypoints.openai.api_server
-      args:
-        - --port=8080
-        - --model=/mnt/models
-        - --served-model-name=bge-small-en-v15
-        - --dtype=float16
-        - --max-model-len=512
-        - --trust-remote-code
-        - --enforce-eager
-      env:
-        - name: HF_HUB_CACHE
-          value: /tmp
-      ports:
-        - containerPort: 8080
-          protocol: TCP
-      resources:
-        limits:
-          cpu: "2"
-          memory: 4Gi
-        requests:
-          cpu: "1"
-          memory: 2Gi
-      readinessProbe:
-        httpGet:
-          path: /health
-          port: 8080
-        initialDelaySeconds: 30
-        periodSeconds: 10
-      livenessProbe:
-        httpGet:
-          path: /health
-          port: 8080
-        initialDelaySeconds: 30
-        periodSeconds: 15
+  - autoSelect: true
+    name: vLLM

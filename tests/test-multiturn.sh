@@ -20,7 +20,7 @@ USER_EMAIL="${1:-jessica.thompson@example.com}"
 chat() {
     local turn="$1" message="$2" intent="${3:-}"
     echo "--- Turn $turn ---"
-    local body="{\"user_email\":\"$USER_EMAIL\",\"message\":\"$message\",\"session_id\":\"$SESSION\""
+    local body="{\"user_id\":\"$USER_EMAIL\",\"message\":\"$message\",\"session_id\":\"$SESSION\""
     if [[ -n "$intent" ]]; then
         body="$body,\"predefined_intent\":\"$intent\""
     fi

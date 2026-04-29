@@ -31,6 +31,8 @@ spec:
               value: "${VECTOR_DB_ID}"
             - name: MCP_TOOLGROUP
               value: "${MCP_TOOLGROUP}"
+            - name: RERANK_ENABLED
+              value: "${RERANK_ENABLED}"
             - name: RERANKER_URL
               value: "${RERANKER_URL}"
             - name: RERANKER_MODEL
@@ -39,11 +41,10 @@ spec:
               value: "${RERANK_TOP_K}"
             - name: RERANK_TOP_N
               value: "${RERANK_TOP_N}"
-            - name: PROMPTS_MOUNT_PATH
-              value: "/app/config/prompts"
           volumeMounts:
             - name: prompts
-              mountPath: /app/config/prompts
+              mountPath: /app/src/agent/prompts.py
+              subPath: prompts.py
               readOnly: true
           readinessProbe:
             httpGet:

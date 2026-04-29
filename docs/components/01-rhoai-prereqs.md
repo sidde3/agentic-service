@@ -1,4 +1,4 @@
-# 00 — RHOAI Prerequisites
+# 01 — RHOAI Prerequisites
 
 One-time cluster-admin setup that enables Red Hat OpenShift AI features and registers MCP servers for GenAI Studio.
 

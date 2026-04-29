@@ -6,24 +6,29 @@ The UserInfo MCP Server is a simple implementation that demonstrates how to expo
 
 Bridges the UserInfo REST API (11) with the MCP protocol. When LlamaStack's agent calls an MCP tool (e.g., `get_user_info`), this server translates it into HTTP requests against the UserInfo API and returns structured results.
 
-## Source: `server.py`
+## Source Files
+
+| File | Purpose |
+|------|---------|
+| `server.py` | FastAPI app with MCP JSON-RPC endpoint, health check, and root |
+| `tools.py` | API helpers and the 5 tool handler functions |
+| `tools_schema.py` | `TOOLS` dict (name → handler) and `TOOL_SCHEMAS` list (JSON schemas for `tools/list`) |
 
 ### MCP Tools
 
-| Tool | Description | API Call |
-|------|-------------|----------|
-| `get_user_info` | Get user profile by email | `GET /api/v1/users?email={email}` |
-| `get_user_subscriptions` | Get active subscriptions | `GET /api/v1/subscriptions?user_id={id}` |
-| `get_subscription_usage` | Get usage records for a subscription | `GET /api/v1/subscriptions/{id}/usage` |
-| `get_usage_insights` | Get AI-generated usage insights | `GET /api/v1/insights?user_id={id}` |
-| `get_current_plan` | Get the user's current plan details | `GET /api/v1/user-plans?user_id={id}` |
+| Tool | Description | API Calls |
+|------|-------------|-----------|
+| `get_user_info` | Get user profile and subscriptions by username | `GET /api/v1/users?username={username}` → `GET /api/v1/users/{user_id}` |
+| `get_user_subscriptions` | Get all subscriptions for a user | `GET /api/v1/users?username={username}` → `GET /api/v1/subscriptions?user_id={id}` |
+| `get_current_plan` | Get the active plan for a mobile number | `GET /api/v1/subscriptions` → `GET /api/v1/subscriptions/{id}/plans` |
+| `get_subscription_usage` | Get daily usage records for a mobile number | `GET /api/v1/subscriptions` → `GET /api/v1/subscriptions/{id}/usage` |
+| `get_usage_insights` | Get usage insights for a mobile number | `GET /api/v1/subscriptions` → `GET /api/v1/subscriptions/{id}/insights` |
 
 ### Endpoints
 
 | Method | Path | Purpose |
 |--------|------|---------|
 | `POST` | `/mcp` | MCP JSON-RPC endpoint (tool calls) |
-| `POST` | `/tools/{tool_name}` | REST alternative for each tool |
 | `GET` | `/health` | Health check |
 | `GET` | `/` | Server info and available tools |
 
@@ -46,5 +51,5 @@ Bridges the UserInfo REST API (11) with the MCP protocol. When LlamaStack's agen
 
 - **11-userinfo-api** — All data fetched via HTTP
 - **04-llamastack** — Registered as MCP toolgroup; called by agents during tool execution
-- **00-rhoai-prereqs** — Listed in GenAI Studio ConfigMap
+- **01-rhoai-prereqs** — Listed in GenAI Studio ConfigMap
 - **08-agent** — Default `MCP_TOOLGROUP` points to this server

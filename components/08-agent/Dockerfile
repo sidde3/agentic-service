@@ -19,4 +19,4 @@ USER 1001
 ENV PYTHONPATH=/app
 EXPOSE 8080
 
-CMD ["python", "-m", "uvicorn", "src.agent.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["python", "-m", "uvicorn", "src.agent.server:app", "--host", "0.0.0.0", "--port", "8080"]

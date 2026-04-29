@@ -49,4 +49,4 @@ Provides MCP tools over JSON-RPC at `POST /mcp`. Each tool executes SQL against 
 
 - **02-pgvector** — Reads from `userinfo` database
 - **04-llamastack** — Registered as a toolgroup; callable by agents
-- **00-rhoai-prereqs** — Listed in GenAI Studio ConfigMap
+- **01-rhoai-prereqs** — Listed in GenAI Studio ConfigMap

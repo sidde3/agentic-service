@@ -1,25 +1,22 @@
-# InferenceService: Qwen2.5-7B-Instruct (LLM for agent reasoning)
+# InferenceService: Qwen3-Reranker-0.6B (reranker for RAG results)
 # Source: intent-classification-sidd namespace
-# Model: hf://Qwen/Qwen2.5-7B-Instruct
-# Key args: --tool-call-parser hermes --enable-auto-tool-choice (enables MCP tool calling)
+# Model: hf://Qwen/Qwen3-Reranker-0.6B
+# Key args: --runner=pooling --task=score (runs as a scoring/reranking model, not generative)
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
   annotations:
-    opendatahub.io/connections: qwen25-7b-instruct
-    opendatahub.io/genai-asset: "true"
-    opendatahub.io/genai-use-case: chat, llm
+    opendatahub.io/connections: qwen3-reranker-06b
     opendatahub.io/hardware-profile-name: nvidia-gpu
     opendatahub.io/hardware-profile-namespace: redhat-ods-applications
     opendatahub.io/model-type: generative
-    openshift.io/display-name: Qwen2.5-7B-Instruct
+    openshift.io/display-name: Qwen3-Reranker-0.6B
     security.opendatahub.io/enable-auth: "false"
     serving.kserve.io/deploymentMode: RawDeployment
   labels:
     networking.kserve.io/visibility: exposed
     opendatahub.io/dashboard: "true"
-    opendatahub.io/genai-asset: "true"
-  name: qwen25-7b-instruct
+  name: qwen3-reranker-06b
   namespace: ${NS_MODELS}
 spec:
   predictor:
@@ -30,12 +27,10 @@ spec:
     minReplicas: 1
     model:
       args:
+      - --max-model-len 8192
       - --trust-remote-code
-      - --gpu-memory-utilization=0.90
-      - --dtype=float16
-      - --tool-call-parser
-      - hermes
-      - --enable-auto-tool-choice
+      - --runner=pooling
+      - --task=score
       modelFormat:
         name: vLLM
       name: ""
@@ -48,8 +43,8 @@ spec:
           cpu: "2"
           memory: 4Gi
           nvidia.com/gpu: "1"
-      runtime: qwen25-7b-instruct
-      storageUri: hf://Qwen/Qwen2.5-7B-Instruct
+      runtime: qwen3-reranker-06b
+      storageUri: hf://Qwen/Qwen3-Reranker-0.6B
     tolerations:
     - effect: NoSchedule
       key: nvidia.com/gpu

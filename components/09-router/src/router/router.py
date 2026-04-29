@@ -431,7 +431,7 @@ async def chat_endpoint(req: ChatRequest, request: Request):
         agent_user_id = resolved_user["email"] if resolved_user else req.user_id
         if intent in AGENT_INTENTS:
             reply, backend_data = await _call_agent(
-                agent_user_id, req.message, session_id, intent, sm, username,
+                agent_user_id, req.message, session_id, intent,
             )
         else:
             reply, backend_data = stub.get_response(intent)
@@ -485,16 +485,9 @@ async def _call_agent(
     message: str,
     session_id: str,
     intent: str,
-    sm: SessionManager,
-    username: str,
 ) -> tuple:
     """Route to the mobile plan recommendation agent and return (reply, backend_data)."""
     try:
-        window = await sm.get_window(username)
-        session_history = [
-            {"role": m["role"], "content": m["content"]} for m in window
-        ]
-
         async with httpx.AsyncClient(timeout=120, verify=False) as client:
             resp = await client.post(
                 f"{AGENT_API_URL}/recommend",
@@ -503,7 +496,6 @@ async def _call_agent(
                     "query": message,
                     "session_id": session_id,
                     "intent": intent,
-                    "session_history": session_history,
                 },
             )
             resp.raise_for_status()

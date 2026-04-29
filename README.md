@@ -8,7 +8,7 @@ A user messages through a **Streamlit Chat UI**. The **Router** classifies the m
 
 | # | Component | Description | Docs |
 |---|-----------|-------------|------|
-| 00 | RHOAI Prerequisites | KServe, GenAI Studio, LlamaStack operator, MCP ConfigMap | [docs](docs/components/00-rhoai-prereqs.md) |
+| 01 | RHOAI Prerequisites | KServe, GenAI Studio, LlamaStack operator, MCP ConfigMap | [docs](docs/components/01-rhoai-prereqs.md) |
 | 02 | pgvector | PostgreSQL + pgvector: 3 databases, K8s Jobs for init/seed | [docs](docs/components/02-pgvector.md) |
 | 03 | Models | Qwen 2.5 7B (GPU), BERT (CPU), BGE-small (CPU) | [docs](docs/components/03-models.md) |
 | 04 | LlamaStack | Inference, agents, vector I/O, MCP tool runtime | [docs](docs/components/04-llamastack.md) |
@@ -65,7 +65,7 @@ See the full [Deployment Guide](docs/deployment-guide.md) for details.
 ais-agentic-usecase/
 ├── config/                    # env.properties (central configuration)
 ├── components/
-│   ├── 00-rhoai-prereqs/      # Cluster-admin RHOAI setup
+│   ├── 01-rhoai-prereqs/      # Cluster-admin RHOAI setup
 │   ├── 02-pgvector/           # PostgreSQL + pgvector + K8s Jobs
 │   ├── 03-models/             # KServe InferenceServices (Qwen, BERT, BGE)
 │   ├── 04-llamastack/         # LlamaStack distribution + plan data

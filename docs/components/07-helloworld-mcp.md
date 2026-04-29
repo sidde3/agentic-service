@@ -35,4 +35,4 @@ No database or external dependencies. Listens on port 8000.
 
 ## Connections
 
-- **00-rhoai-prereqs** — Listed in GenAI Studio ConfigMap for playground testing
+- **01-rhoai-prereqs** — Listed in GenAI Studio ConfigMap for playground testing

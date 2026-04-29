@@ -63,6 +63,28 @@ oc get configmap llamastack-user-config -n $NS_LLAMASTACK -o yaml | python3 -c "
 
 **Fix**: Increase `timeoutSeconds` to 10 in the deployment manifest.
 
+**Error**: Reranker returns `404 Not Found` on `/v1/rerank`
+
+**Cause**: `RERANKER_MODEL` is set to the HuggingFace model path (e.g. `Qwen/Qwen3-Reranker-0.6B`) instead of the vLLM model ID (e.g. `qwen3-reranker-06b`).
+
+**Fix**: Check the model ID with `curl -sk <RERANKER_URL_BASE>/v1/models` and set `RERANKER_MODEL` to match:
+```bash
+oc set env deployment/agent-service RERANKER_MODEL=qwen3-reranker-06b
+```
+
+---
+
+**Error**: Reranking is skipped — no `[RERANK]` logs at startup
+
+**Cause**: `RERANKER_URL` or `RERANKER_MODEL` env var is empty or not set on the deployment.
+
+**Fix**: Verify env vars are set:
+```bash
+oc get deployment agent-service -o jsonpath='{.spec.template.spec.containers[0].env}' | python3 -m json.tool | grep -A1 RERANKER
+```
+
+---
+
 ## Router
 
 **Error**: `Redis connection failed: [Errno 61] Connect call failed`

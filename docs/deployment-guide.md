@@ -22,6 +22,8 @@ Three AI models must be deployed as KServe InferenceServices **before** running 
 
 4. **`qwen3-reranker-06b`** (optional) — Cross-encoder reranker model. The **Agent** calls this model to rerank vector search results before passing them to the LLM, improving plan recommendation quality. If not deployed, the agent falls back to raw vector similarity ranking.
 
+> **Note:** `RERANKER_MODEL` in `env.properties` must match the model ID reported by the vLLM endpoint (`curl -sk <RERANKER_URL_BASE>/v1/models`). This is the **InferenceService name** (e.g. `qwen3-reranker-06b`), not the HuggingFace model path (e.g. `Qwen/Qwen3-Reranker-0.6B`).
+
 Deploy these via the OpenShift AI dashboard or by manually applying the reference manifests in `components/03-models/reference/`.
 
 ## Quick Start
@@ -78,7 +80,7 @@ The `deploy-all.sh` script processes components in numeric order:
 
 ### Phase 1: Infrastructure
 
-1. **00-rhoai-prereqs** — Enables KServe, GenAI Studio, LlamaStack operator. Registers MCP servers in the dashboard.
+1. **01-rhoai-prereqs** — Enables KServe, GenAI Studio, LlamaStack operator. Registers MCP servers in the dashboard.
 2. **02-pgvector** — Deploys PostgreSQL StatefulSet. Post-deploy: K8s Jobs create databases (`userinfo`, `llamastack`, `pgvector`) and seed sample data.
 3. **03-models** — Verifies that the three pre-deployed InferenceServices (Qwen, BERT, BGE-small) are `Ready`. Does not apply any manifests — reference manifests are in `components/03-models/reference/`.
 
@@ -134,7 +136,7 @@ curl -sk https://router-service-${NS_SERVICES}.${CLUSTER_DOMAIN}/health
 # Test a chat request
 curl -sk -X POST https://router-service-${NS_SERVICES}.${CLUSTER_DOMAIN}/chat \
   -H "Content-Type: application/json" \
-  -d '{"user_email":"jessica.thompson@example.com","message":"Check my current data usage"}'
+  -d '{"user_id":"jessica.thompson@example.com","message":"Check my current data usage"}'
 ```
 
 ## Selective Deployment

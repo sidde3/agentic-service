@@ -10,7 +10,7 @@
 
 | # | Component | Description |
 |---|-----------|-------------|
-| 00 | [RHOAI Prerequisites](components/00-rhoai-prereqs.md) | Cluster setup, GenAI Studio config |
+| 01 | [RHOAI Prerequisites](components/01-rhoai-prereqs.md) | Cluster setup, GenAI Studio config |
 | 02 | [pgvector](components/02-pgvector.md) | PostgreSQL + pgvector, DB init jobs |
 | 03 | [Models](components/03-models.md) | Qwen, BERT, BGE-small InferenceServices |
 | 04 | [LlamaStack](components/04-llamastack.md) | LlamaStack distribution, agents, vector I/O |

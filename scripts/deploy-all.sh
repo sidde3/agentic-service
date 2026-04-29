@@ -28,37 +28,24 @@ for component_dir in "$COMPONENTS_DIR"/[0-9][0-9]-*/; do
     component_name=$(basename "$component_dir")
     section "Deploying $component_name"
 
-    # 00-rhoai-prereqs: run setup script instead of manifests
-    if [[ "$component_name" == "00-rhoai-prereqs" ]]; then
+    # 01-rhoai-prereqs: run setup script instead of manifests
+    if [[ "$component_name" == "01-rhoai-prereqs" ]]; then
         if [[ -f "$component_dir/setup/enable-rhoai-features.sh" ]]; then
             echo "  Running RHOAI prerequisite setup ..."
             bash "$component_dir/setup/enable-rhoai-features.sh"
         fi
         apply_manifests "$component_dir/manifests"
-        echo "  00-rhoai-prereqs READY"
+        echo "  01-rhoai-prereqs READY"
         continue
     fi
 
-    # 03-models: models must be pre-deployed via OpenShift AI dashboard.
-    # Manifests in reference/ are provided for documentation only.
-    # This step only verifies the InferenceServices are Ready.
+    # 03-models: hard prerequisite — must be pre-deployed via OpenShift AI dashboard.
+    # Manifests in components/03-models/reference/ are for documentation only.
+    # Model names/URLs must be configured in env.properties before running this script.
     if [[ "$component_name" == "03-models" ]]; then
-        echo "  Models are expected to be pre-deployed (see components/03-models/reference/)."
-        echo "  Verifying InferenceServices are Ready in $NS_MODELS ..."
-        for isvc in qwen25-7b-instruct "$BERT_MODEL_NAME" bge-small-en-v15; do
-            echo "  Checking $isvc ..."
-            for i in $(seq 1 90); do
-                ready=$(oc get inferenceservice "$isvc" -n "$NS_MODELS" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
-                [[ "$ready" == "True" ]] && break
-                sleep 10
-            done
-            if [[ "$ready" == "True" ]]; then
-                echo "    $isvc is Ready."
-            else
-                echo "    WARNING: $isvc not Ready after 15 min. Check: oc get inferenceservice $isvc -n $NS_MODELS"
-            fi
-        done
-        echo "  03-models READY"
+        echo "  Models are a hard prerequisite (see components/03-models/reference/)."
+        echo "  Ensure all models are deployed and configured in env.properties."
+        echo "  03-models SKIPPED (reference only)"
         continue
     fi
 
@@ -140,7 +127,7 @@ echo "  Chat test (usage check):"
 printf "  %-30s " "POST /chat"
 CHAT_RESPONSE=$(curl -sk -X POST "$ROUTER_ROUTE_URL/chat" \
     -H "Content-Type: application/json" \
-    -d '{"user_email":"jessica.thompson@example.com","message":"Check my current data usage","predefined_intent":"MOBILE_USAGE_CHECK_DATA_CURRENT"}' 2>/dev/null || echo "")
+    -d '{"user_id":"jessica.thompson@example.com","message":"Check my current data usage","predefined_intent":"MOBILE_USAGE_CHECK_DATA_CURRENT"}' 2>/dev/null || echo "")
 if echo "$CHAT_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d.get('reply')" 2>/dev/null; then
     echo "OK (got reply)"
     SMOKE_PASS=$((SMOKE_PASS + 1))

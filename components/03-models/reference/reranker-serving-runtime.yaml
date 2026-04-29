@@ -1,4 +1,4 @@
-# ServingRuntime: Qwen2.5-7B-Instruct (GPU — vLLM NVIDIA CUDA)
+# ServingRuntime: Qwen3-Reranker-0.6B (GPU — vLLM NVIDIA CUDA)
 # Source: intent-classification-sidd namespace
 apiVersion: serving.kserve.io/v1alpha1
 kind: ServingRuntime
@@ -12,7 +12,7 @@ metadata:
     openshift.io/display-name: vLLM NVIDIA GPU ServingRuntime for KServe
   labels:
     opendatahub.io/dashboard: "true"
-  name: qwen25-7b-instruct
+  name: qwen3-reranker-06b
   namespace: ${NS_MODELS}
 spec:
   annotations:

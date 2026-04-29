@@ -1,17 +1,44 @@
+# InferenceService: bge-small-en-v1.5 (embedding model for vector search)
+# Source: intent-classification-sidd namespace
+# Model: hf://BAAI/bge-small-en-v1.5
+# Key args: --runner=pooling (runs as an embedding model, not generative)
+# Runs on CPU — no GPU required
 apiVersion: serving.kserve.io/v1beta1
 kind: InferenceService
 metadata:
+  annotations:
+    opendatahub.io/connections: bge-small-en-v15
+    opendatahub.io/hardware-profile-name: default-profile
+    opendatahub.io/hardware-profile-namespace: redhat-ods-applications
+    opendatahub.io/model-type: generative
+    openshift.io/display-name: bge-small-en-v1.5
+    security.opendatahub.io/enable-auth: "false"
+    serving.kserve.io/deploymentMode: RawDeployment
+  labels:
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
   name: bge-small-en-v15
   namespace: ${NS_MODELS}
-  annotations:
-    serving.kserve.io/deploymentMode: RawDeployment
-    opendatahub.io/genai-asset: "true"
-  labels:
-    opendatahub.io/dashboard: "true"
 spec:
   predictor:
+    automountServiceAccountToken: false
+    deploymentStrategy:
+      type: Recreate
+    maxReplicas: 1
+    minReplicas: 1
     model:
+      args:
+      - --runner=pooling
+      - --trust-remote-code
       modelFormat:
         name: vLLM
-      runtime: vllm-bge-small-runtime
+      name: ""
+      resources:
+        limits:
+          cpu: "2"
+          memory: 4Gi
+        requests:
+          cpu: "2"
+          memory: 4Gi
+      runtime: bge-small-en-v15
       storageUri: hf://BAAI/bge-small-en-v1.5
