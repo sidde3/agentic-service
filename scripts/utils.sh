@@ -80,7 +80,7 @@ USERINFO_API_URL=$USERINFO_API_URL
 EOF
 }
 
-# ── Apply a manifest directory with envsubst ────────────────────────────
+# ── Apply a manifest directory (${VAR} from environment via python3) ────
 apply_manifests() {
     local manifest_dir="$1"
     if [[ ! -d "$manifest_dir" ]]; then
@@ -90,7 +90,7 @@ apply_manifests() {
     for yaml_file in "$manifest_dir"/*.yaml; do
         [[ -f "$yaml_file" ]] || continue
         echo "  Applying $(basename "$yaml_file") ..."
-        envsubst < "$yaml_file" | oc apply -f -
+        python3 "${REPO_ROOT}/scripts/substitute_manifest.py" < "$yaml_file" | oc apply -f -
     done
 }
 

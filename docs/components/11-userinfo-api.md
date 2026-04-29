@@ -55,7 +55,7 @@ One router module per resource:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `DATABASE_URL` | — | Async PostgreSQL connection string (set via envsubst in manifest) |
+| `DATABASE_URL` | — | Async PostgreSQL connection string (expanded from env in manifest via `substitute_manifest.py`) |
 | `PORT` | `8000` | Listen port |
 | `SQL_ECHO` | `false` | Enable SQL query logging |
 

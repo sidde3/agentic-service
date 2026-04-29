@@ -4,6 +4,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../.env.computed" 2>/dev/null || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 NS="${NS_PGVECTOR:-agentic-service}"
 JOB_NAME="db-init"
 
@@ -17,9 +18,9 @@ oc delete job "$JOB_NAME" -n "$NS" --ignore-not-found 2>/dev/null
 oc delete configmap db-init-sql -n "$NS" --ignore-not-found 2>/dev/null
 sleep 2
 
-# Apply the Job manifest (envsubst fills in variable references)
+# Apply the Job manifest (${VAR} from environment via python3)
 echo "  Applying $JOB_NAME Job ..."
-envsubst < "$SCRIPT_DIR/01-db-init-job.yaml" | oc apply -f -
+python3 "$REPO_ROOT/scripts/substitute_manifest.py" < "$SCRIPT_DIR/01-db-init-job.yaml" | oc apply -f -
 
 # Wait for the Job to complete
 echo "  Waiting for Job/$JOB_NAME to complete (timeout 120s) ..."

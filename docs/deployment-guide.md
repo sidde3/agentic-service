@@ -8,7 +8,7 @@ Step-by-step instructions for deploying the AI Agentic Use Case on an OpenShift 
 - Red Hat OpenShift AI operator installed (with LlamaStack operator support)
 - `oc` CLI authenticated to the cluster
 - At least 1 NVIDIA GPU (T4/L40) for Qwen model serving
-- `envsubst` available (part of `gettext`)
+- `python3` available on the machine that runs deploy scripts (used to expand `${VAR}` in manifests; no `gettext`/`envsubst` required)
 
 ### Required AI Models (must be pre-deployed)
 
